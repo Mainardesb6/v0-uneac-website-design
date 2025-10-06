@@ -9,14 +9,32 @@ import { useCart } from "@/lib/cart-context"
 import { useAuth } from "@/lib/auth-context"
 import { CartSidebar } from "@/components/cart-sidebar"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { createClient } from "@/lib/supabase/client"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const { state } = useCart()
   const { user, logout } = useAuth()
+
+  useEffect(() => {
+    async function checkAdmin() {
+      if (!user) {
+        setIsAdmin(false)
+        return
+      }
+
+      const supabase = createClient()
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+
+      setIsAdmin(profile?.role === "admin")
+    }
+
+    checkAdmin()
+  }, [user])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -99,6 +117,16 @@ export function Header() {
                         <User className="mr-2 h-4 w-4" />
                         Minha Conta
                       </Link>
+                      {isAdmin && (
+                        <Link
+                          href="/admin/pedidos"
+                          className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Gerenciar Pedidos
+                        </Link>
+                      )}
                       <div className="border-t my-1" />
                       <button
                         onClick={handleLogout}
@@ -212,6 +240,14 @@ export function Header() {
                         Minha Conta
                       </Link>
                     </Button>
+                    {isAdmin && (
+                      <Button variant="outline" asChild className="w-full bg-transparent">
+                        <Link href="/admin/pedidos" onClick={() => setIsMenuOpen(false)}>
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Gerenciar Pedidos
+                        </Link>
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       onClick={() => {

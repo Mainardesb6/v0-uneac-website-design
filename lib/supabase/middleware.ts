@@ -52,10 +52,23 @@ export async function updateSession(request: NextRequest) {
     "/nossa-equipe",
   ]
   const publicRoutePrefixes = ["/curso/", "/categoria/"]
+  const protectedRoutePrefixes = ["/admin/"]
 
   const isPublicRoute =
     publicRoutes.some((route) => request.nextUrl.pathname === route) ||
     publicRoutePrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix))
+
+  const isAdminRoute = protectedRoutePrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix))
+
+  if (isAdminRoute && user) {
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+
+    if (profile?.role !== "admin") {
+      const url = request.nextUrl.clone()
+      url.pathname = "/"
+      return NextResponse.redirect(url)
+    }
+  }
 
   // Redirect to login if user is not authenticated and trying to access protected routes
   if (!user && !isPublicRoute && !request.nextUrl.pathname.startsWith("/auth")) {
