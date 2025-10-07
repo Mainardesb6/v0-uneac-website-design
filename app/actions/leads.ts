@@ -5,40 +5,22 @@ import { revalidatePath } from "next/cache"
 
 export async function subscribeNewsletter(email: string) {
   try {
-    console.log("[v0] Newsletter subscription attempt for:", email)
     const supabase = await createClient()
 
-    const { data, error } = await supabase
-      .from("newsletter_subscribers")
-      .insert([{ email, status: "active", source: "website" }])
-      .select()
-      .single()
+    const { data, error } = await supabase.from("newsletter_subscribers").insert([{ email }]).select().single()
 
     if (error) {
-      console.error("[v0] Newsletter subscription error:", {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-      })
-
       if (error.code === "23505") {
         return { success: false, error: "Este e-mail já está cadastrado na nossa newsletter." }
-      }
-
-      if (error.code === "42P01") {
-        console.error("[v0] Table newsletter_subscribers does not exist!")
-        return { success: false, error: "Sistema de newsletter não configurado. Entre em contato com o suporte." }
       }
 
       return { success: false, error: "Erro ao cadastrar e-mail. Tente novamente." }
     }
 
-    console.log("[v0] Newsletter subscription successful:", data.id)
     revalidatePath("/admin/leads")
     return { success: true, data }
   } catch (error) {
-    console.error("[v0] Newsletter subscription exception:", error)
+    console.error("Newsletter error:", error)
     return { success: false, error: "Erro ao cadastrar e-mail. Tente novamente." }
   }
 }
@@ -50,7 +32,6 @@ export async function submitContactMessage(formData: {
   message: string
 }) {
   try {
-    console.log("[v0] Contact message submission attempt from:", formData.email)
     const supabase = await createClient()
 
     const { data, error } = await supabase
@@ -68,26 +49,14 @@ export async function submitContactMessage(formData: {
       .single()
 
     if (error) {
-      console.error("[v0] Contact message error:", {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-      })
-
-      if (error.code === "42P01") {
-        console.error("[v0] Table contact_messages does not exist!")
-        return { success: false, error: "Sistema de contato não configurado. Entre em contato com o suporte." }
-      }
-
+      console.error("Contact error:", error)
       return { success: false, error: "Erro ao enviar mensagem. Tente novamente." }
     }
 
-    console.log("[v0] Contact message submitted successfully:", data.id)
     revalidatePath("/admin/leads")
     return { success: true, data }
   } catch (error) {
-    console.error("[v0] Contact message exception:", error)
+    console.error("Contact exception:", error)
     return { success: false, error: "Erro ao enviar mensagem. Tente novamente." }
   }
 }
@@ -99,14 +68,12 @@ export async function updateContactMessageStatus(id: string, status: string) {
     const { error } = await supabase.from("contact_messages").update({ status }).eq("id", id)
 
     if (error) {
-      console.error("Error updating contact message status:", error)
       return { success: false, error: "Erro ao atualizar status." }
     }
 
     revalidatePath("/admin/leads")
     return { success: true }
   } catch (error) {
-    console.error("Error updating contact message status:", error)
     return { success: false, error: "Erro ao atualizar status." }
   }
 }
