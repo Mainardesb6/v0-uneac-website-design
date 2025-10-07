@@ -31,21 +31,41 @@ export default function LoginPage() {
       return
     }
 
-    const success = await login(email, password)
+    try {
+      const success = await login(email, password)
 
-    if (success) {
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo de volta!",
-      })
-      router.push("/")
-    } else {
-      setError("Credenciais inválidas.")
-      toast({
-        title: "Erro no login",
-        description: "Email ou senha incorretos.",
-        variant: "destructive",
-      })
+      if (success) {
+        toast({
+          title: "Login realizado com sucesso!",
+          description: "Bem-vindo de volta!",
+        })
+        router.push("/")
+      } else {
+        setError("E-mail ou senha inválidos.")
+        toast({
+          title: "Erro no login",
+          description: "E-mail ou senha incorretos.",
+          variant: "destructive",
+        })
+      }
+    } catch (err: any) {
+      // CRITICAL: Check for "Email not confirmed" error
+      if (err.message === "EMAIL_NOT_CONFIRMED") {
+        setError("Login falhou. Você precisa confirmar seu e-mail antes de entrar. Verifique sua caixa de entrada.")
+        toast({
+          title: "E-mail não confirmado",
+          description: "Você precisa confirmar seu e-mail antes de fazer login. Verifique sua caixa de entrada.",
+          variant: "destructive",
+          duration: 8000,
+        })
+      } else {
+        setError("E-mail ou senha inválidos.")
+        toast({
+          title: "Erro no login",
+          description: "E-mail ou senha incorretos.",
+          variant: "destructive",
+        })
+      }
     }
   }
 

@@ -63,11 +63,19 @@ export default function CadastroPage() {
 
       if (success) {
         toast({
-          title: "Conta criada com sucesso!",
-          description: "Verifique seu email para confirmar sua conta antes de fazer login.",
-          duration: 6000,
+          title: "Cadastro realizado com sucesso!",
+          description: "Verifique sua caixa de entrada para confirmar sua conta e poder fazer o login.",
+          duration: 8000,
         })
-        router.push("/login")
+
+        // Show success message on the page
+        setError("")
+        setFormData({ name: "", email: "", password: "", cpf: "", phone: "" })
+
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          router.push("/login")
+        }, 3000)
       }
     } catch (err: any) {
       if (err.message === "EMAIL_EXISTS") {
@@ -88,7 +96,7 @@ export default function CadastroPage() {
         setError("Erro ao criar conta. Tente novamente.")
         toast({
           title: "Erro no cadastro",
-          description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
+          description: err.message || "Ocorreu um erro ao criar sua conta. Tente novamente.",
           variant: "destructive",
         })
       }
@@ -224,7 +232,7 @@ export default function CadastroPage() {
                       Criando conta...
                     </>
                   ) : (
-                    "Criar Conta"
+                    "Cadastrar"
                   )}
                 </Button>
               </form>
@@ -233,7 +241,7 @@ export default function CadastroPage() {
                 <p className="text-sm text-muted-foreground">
                   Já tem uma conta?{" "}
                   <Link href="/login" className="text-primary font-medium hover:underline">
-                    Faça login
+                    Entre
                   </Link>
                 </p>
               </div>

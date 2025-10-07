@@ -105,7 +105,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     })
 
-    if (error || !data.user) {
+    if (error) {
+      setState((prev) => ({ ...prev, isLoading: false }))
+
+      // Check if email is not confirmed
+      if (error.message.includes("Email not confirmed")) {
+        throw new Error("EMAIL_NOT_CONFIRMED")
+      }
+
+      return false
+    }
+
+    if (!data.user) {
       setState((prev) => ({ ...prev, isLoading: false }))
       return false
     }
@@ -124,8 +135,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
+    // CRITICAL: Check CPF exists BEFORE creating user
     if (cpf && cpf.replace(/\D/g, "").length === 11) {
-      const { data: existingCpf } = await supabase.from("profiles").select("id").eq("cpf", cpf).single()
+      const formattedCpf = cpf.replace(/\D/g, "")
+      const { data: existingCpf } = await supabase.from("profiles").select("cpf").eq("cpf", cpf).maybeSingle()
 
       if (existingCpf) {
         setState((prev) => ({ ...prev, isLoading: false }))
@@ -133,27 +146,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // Create user in auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/minha-conta`,
-        data: {
-          name,
-          cpf,
-          phone,
-        },
+        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/login`,
       },
     })
 
-    if (error || !data.user) {
+    if (error) {
       setState((prev) => ({ ...prev, isLoading: false }))
-      if (error?.message?.includes("already registered")) {
+      if (error.message.includes("already registered") || error.message.includes("User already registered")) {
         throw new Error("EMAIL_EXISTS")
       }
+      throw error
+    }
+
+    if (!data.user) {
+      setState((prev) => ({ ...prev, isLoading: false }))
       return false
     }
 
+    // Create profile immediately after user creation
+    const { error: profileError } = await supabase.from("profiles").insert({
+      id: data.user.id,
+      name,
+      email,
+      cpf: cpf || null,
+      phone: phone || null,
+    })
+
+    if (profileError) {
+      setState((prev) => ({ ...prev, isLoading: false }))
+      throw profileError
+    }
+
+    setState((prev) => ({ ...prev, isLoading: false }))
     return true
   }
 
