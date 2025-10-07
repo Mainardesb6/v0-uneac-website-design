@@ -95,23 +95,19 @@ export default function AdminPedidosPage() {
         (ordersData || []).map(async (order) => {
           const { data: items } = await supabase.from("order_items").select("*").eq("order_id", order.id)
 
+          // Load customer data including email from profiles table
           const { data: profile } = await supabase
             .from("profiles")
-            .select("name, phone, cpf")
+            .select("name, email, phone, cpf")
             .eq("id", order.user_id)
             .single()
-
-          // Get user email from auth
-          const {
-            data: { user: authUser },
-          } = await supabase.auth.admin.getUserById(order.user_id)
 
           return {
             ...order,
             items: items || [],
             customer: {
               name: profile?.name || "N/A",
-              email: authUser?.email || "N/A",
+              email: profile?.email || "N/A",
               phone: profile?.phone || "N/A",
               cpf: profile?.cpf || "N/A",
             },
