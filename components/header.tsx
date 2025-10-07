@@ -22,15 +22,28 @@ export function Header() {
 
   useEffect(() => {
     async function checkAdmin() {
+      console.log("[v0 Admin Check] Starting admin verification")
+      console.log("[v0 Admin Check] User object:", user)
+
       if (!user) {
+        console.log("[v0 Admin Check] No user found, setting isAdmin to false")
         setIsAdmin(false)
         return
       }
 
-      const supabase = createClient()
-      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+      console.log("[v0 Admin Check] User ID:", user.id)
+      console.log("[v0 Admin Check] User email:", user.email)
 
-      setIsAdmin(profile?.role === "admin")
+      const supabase = createClient()
+      const { data: profile, error } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+
+      console.log("[v0 Admin Check] Profile query result:", { profile, error })
+      console.log("[v0 Admin Check] Profile role:", profile?.role)
+
+      const adminStatus = profile?.role === "admin"
+      console.log("[v0 Admin Check] Is admin?", adminStatus)
+
+      setIsAdmin(adminStatus)
     }
 
     checkAdmin()
