@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect, useRef } from "react"
+import { createContext, useContext, useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
@@ -35,30 +35,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: null,
     isLoading: true,
   })
-  const loadingRef = useRef(false)
-  const initializedRef = useRef(false)
 
   useEffect(() => {
-    if (initializedRef.current) return
-    initializedRef.current = true
-
     if (typeof window === "undefined") {
       setState({ user: null, isLoading: false })
       return
     }
 
-    console.log("[v0] ========== AUTH PROVIDER INITIALIZING ==========")
-
     const supabase = createClient()
+    let mounted = true
 
-    console.log("[v0] Initial session check")
+    const loadUserProfile = async (supabaseUser: SupabaseUser) => {
+      if (!mounted) return
+
+      const { data: profile } = await supabase.from("profiles").select("*").eq("id", supabaseUser.id).single()
+
+      if (!profile || !mounted) {
+        setState({ user: null, isLoading: false })
+        return
+      }
+
+      const user: User = {
+        id: supabaseUser.id,
+        name: profile.name,
+        email: supabaseUser.email!,
+        cpf: profile.cpf,
+        phone: profile.phone,
+      }
+
+      setState({ user, isLoading: false })
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("[v0] Initial session check:", session ? "Session found" : "No session")
-      if (session?.user) {
-        console.log("[v0] User ID from session:", session.user.id)
+      if (session?.user && mounted) {
         loadUserProfile(session.user)
-      } else {
+      } else if (mounted) {
         setState({ user: null, isLoading: false })
       }
     })
@@ -66,52 +78,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("[v0] Auth state changed:", event)
-      if (session?.user) {
-        console.log("[v0] User authenticated:", session.user.id)
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user && mounted) {
         loadUserProfile(session.user)
-      } else {
-        console.log("[v0] User logged out or session expired")
+      } else if (mounted) {
         setState({ user: null, isLoading: false })
       }
     })
 
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const loadUserProfile = async (supabaseUser: SupabaseUser) => {
-    if (loadingRef.current) return
-    loadingRef.current = true
-
-    console.log("[v0] Loading user profile for:", supabaseUser.id)
-    const supabase = createClient()
-
-    const { data: profile, error } = await supabase.from("profiles").select("*").eq("id", supabaseUser.id).single()
-
-    if (error || !profile) {
-      console.error("[v0] Error loading profile:", error)
-      setState({ user: null, isLoading: false })
-      loadingRef.current = false
-      return
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
     }
-
-    const user: User = {
-      id: supabaseUser.id,
-      name: profile.name,
-      email: supabaseUser.email!,
-      cpf: profile.cpf,
-      phone: profile.phone,
-    }
-
-    console.log("[v0] User profile loaded successfully:", user.email)
-    setState({ user, isLoading: false })
-    loadingRef.current = false
-  }
+  }, []) // Empty dependency array ensures this only runs once
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    console.log("[v0] ========== LOGIN ATTEMPT ==========")
-    console.log("[v0] Email:", email)
     setState((prev) => ({ ...prev, isLoading: true }))
 
     const supabase = createClient()
@@ -122,13 +103,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     if (error || !data.user) {
-      console.error("[v0] Login error:", error)
       setState((prev) => ({ ...prev, isLoading: false }))
       return false
     }
 
-    console.log("[v0] Login successful, user ID:", data.user.id)
-    // Profile will be loaded by the auth state change listener
     return true
   }
 
@@ -147,13 +125,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: existingCpf } = await supabase.from("profiles").select("id").eq("cpf", cpf).single()
 
       if (existingCpf) {
-        console.error("[v0] Registration error: CPF already exists")
         setState((prev) => ({ ...prev, isLoading: false }))
         throw new Error("CPF_EXISTS")
       }
     }
 
-    // Sign up with metadata that will be used by the trigger
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -168,7 +144,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     if (error || !data.user) {
-      console.error("[v0] Registration error:", error)
       setState((prev) => ({ ...prev, isLoading: false }))
       if (error?.message?.includes("already registered")) {
         throw new Error("EMAIL_EXISTS")
@@ -176,7 +151,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false
     }
 
-    // Profile will be loaded by the auth state change listener
     return true
   }
 
@@ -187,10 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const checkEmailExists = async (email: string): Promise<boolean> => {
-    // Supabase doesn't provide a direct way to check if email exists
-    // We'll try to sign in with a dummy password and check the error
-    // This is not ideal but works for the password reset flow
-    return false // For now, always allow password reset attempts
+    return false
   }
 
   const resetPassword = async (email: string): Promise<boolean> => {
@@ -201,7 +172,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     if (error) {
-      console.error("[v0] Password reset error:", error)
       return false
     }
 
