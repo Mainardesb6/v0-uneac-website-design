@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, Phone, MapPin } from "lucide-react"
+import { submitContactMessage } from "@/app/actions/leads"
 
 export default function ContatoPage() {
   const [formData, setFormData] = useState({
@@ -20,16 +21,25 @@ export default function ContatoPage() {
     message: "",
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically handle the form submission
-    console.log("Contact form submission:", formData)
-    setIsSubmitted(true)
-    setFormData({ name: "", email: "", phone: "", message: "" })
+    setIsLoading(true)
+    setError("")
 
-    // Reset the success message after 3 seconds
-    setTimeout(() => setIsSubmitted(false), 3000)
+    const result = await submitContactMessage(formData)
+
+    if (result.success) {
+      setIsSubmitted(true)
+      setFormData({ name: "", email: "", phone: "", message: "" })
+      setTimeout(() => setIsSubmitted(false), 5000)
+    } else {
+      setError(result.error || "Erro ao enviar mensagem.")
+    }
+
+    setIsLoading(false)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -71,12 +81,14 @@ export default function ContatoPage() {
                       </div>
                     ) : (
                       <form onSubmit={handleSubmit} className="space-y-4">
+                        {error && <div className="text-sm text-red-600 p-3 bg-red-50 rounded">{error}</div>}
                         <div>
                           <Input
                             name="name"
                             placeholder="Seu nome completo"
                             value={formData.name}
                             onChange={handleChange}
+                            disabled={isLoading}
                             required
                           />
                         </div>
@@ -87,6 +99,7 @@ export default function ContatoPage() {
                             placeholder="Seu e-mail"
                             value={formData.email}
                             onChange={handleChange}
+                            disabled={isLoading}
                             required
                           />
                         </div>
@@ -97,6 +110,7 @@ export default function ContatoPage() {
                             placeholder="Seu telefone (opcional)"
                             value={formData.phone}
                             onChange={handleChange}
+                            disabled={isLoading}
                           />
                         </div>
                         <div>
@@ -106,14 +120,16 @@ export default function ContatoPage() {
                             rows={5}
                             value={formData.message}
                             onChange={handleChange}
+                            disabled={isLoading}
                             required
                           />
                         </div>
                         <Button
                           type="submit"
+                          disabled={isLoading}
                           className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
                         >
-                          Enviar Mensagem
+                          {isLoading ? "Enviando..." : "Enviar Mensagem"}
                         </Button>
                       </form>
                     )}

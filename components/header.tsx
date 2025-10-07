@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Menu, X, ShoppingCart, User, LogOut } from "lucide-react"
+import { Menu, X, ShoppingCart, User, LogOut, Mail } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
 import { useAuth } from "@/lib/auth-context"
 import { CartSidebar } from "@/components/cart-sidebar"
@@ -22,28 +22,15 @@ export function Header() {
 
   useEffect(() => {
     async function checkAdmin() {
-      console.log("[v0 Admin Check] Starting admin verification")
-      console.log("[v0 Admin Check] User object:", user)
-
       if (!user) {
-        console.log("[v0 Admin Check] No user found, setting isAdmin to false")
         setIsAdmin(false)
         return
       }
 
-      console.log("[v0 Admin Check] User ID:", user.id)
-      console.log("[v0 Admin Check] User email:", user.email)
-
       const supabase = createClient()
-      const { data: profile, error } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
 
-      console.log("[v0 Admin Check] Profile query result:", { profile, error })
-      console.log("[v0 Admin Check] Profile role:", profile?.role)
-
-      const adminStatus = profile?.role === "admin"
-      console.log("[v0 Admin Check] Is admin?", adminStatus)
-
-      setIsAdmin(adminStatus)
+      setIsAdmin(profile?.role === "admin")
     }
 
     checkAdmin()
@@ -131,14 +118,24 @@ export function Header() {
                         Minha Conta
                       </Link>
                       {isAdmin && (
-                        <Link
-                          href="/admin/pedidos"
-                          className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          Gerenciar Pedidos
-                        </Link>
+                        <>
+                          <Link
+                            href="/admin/pedidos"
+                            className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Gerenciar Pedidos
+                          </Link>
+                          <Link
+                            href="/admin/leads"
+                            className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Mail className="mr-2 h-4 w-4" />
+                            Gerenciar Leads
+                          </Link>
+                        </>
                       )}
                       <div className="border-t my-1" />
                       <button
@@ -254,12 +251,20 @@ export function Header() {
                       </Link>
                     </Button>
                     {isAdmin && (
-                      <Button variant="outline" asChild className="w-full bg-transparent">
-                        <Link href="/admin/pedidos" onClick={() => setIsMenuOpen(false)}>
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          Gerenciar Pedidos
-                        </Link>
-                      </Button>
+                      <>
+                        <Button variant="outline" asChild className="w-full bg-transparent">
+                          <Link href="/admin/pedidos" onClick={() => setIsMenuOpen(false)}>
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Gerenciar Pedidos
+                          </Link>
+                        </Button>
+                        <Button variant="outline" asChild className="w-full bg-transparent">
+                          <Link href="/admin/leads" onClick={() => setIsMenuOpen(false)}>
+                            <Mail className="mr-2 h-4 w-4" />
+                            Gerenciar Leads
+                          </Link>
+                        </Button>
+                      </>
                     )}
                     <Button
                       variant="outline"
