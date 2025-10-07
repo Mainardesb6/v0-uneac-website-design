@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { createClient } from "@/lib/supabase/client"
@@ -47,6 +47,7 @@ export default function AdminPedidosPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const loadingRef = useRef(false)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -56,23 +57,25 @@ export default function AdminPedidosPage() {
 
   useEffect(() => {
     async function checkAdminAndLoadOrders() {
-      if (!user) return
+      if (!user || loadingRef.current) return
+      loadingRef.current = true
 
       const supabase = createClient()
 
-      // Check if user is admin
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
 
       if (profile?.role !== "admin") {
         router.push("/")
+        loadingRef.current = false
         return
       }
 
       setIsAdmin(true)
       await loadOrders()
+      loadingRef.current = false
     }
 
-    if (user) {
+    if (user && !loadingRef.current) {
       checkAdminAndLoadOrders()
     }
   }, [user, router])
@@ -84,7 +87,6 @@ export default function AdminPedidosPage() {
     try {
       console.log("[v0 Admin] Loading orders...")
 
-      // Load all orders with items
       const { data: ordersData, error: ordersError } = await supabase
         .from("orders")
         .select("*")
@@ -97,7 +99,6 @@ export default function AdminPedidosPage() {
 
       console.log("[v0 Admin] Orders loaded:", ordersData?.length)
 
-      // Load order items for each order
       const ordersWithDetails = await Promise.all(
         (ordersData || []).map(async (order) => {
           console.log("[v0 Admin] Loading details for order:", order.id, "user_id:", order.user_id)
@@ -105,17 +106,13 @@ export default function AdminPedidosPage() {
           const { data: items } = await supabase.from("order_items").select("*").eq("order_id", order.id)
           console.log("[v0 Admin] Items loaded for order", order.id, ":", items?.length)
 
-          // Load customer data including email from profiles table
-          const { data: profile, error: profileError } = await supabase
+          const { data: profile } = await supabase
             .from("profiles")
             .select("name, email, phone, cpf")
             .eq("id", order.user_id)
             .single()
 
           console.log("[v0 Admin] Profile data for user", order.user_id, ":", profile)
-          if (profileError) {
-            console.error("[v0 Admin] Error loading profile:", profileError)
-          }
 
           return {
             ...order,
@@ -143,7 +140,6 @@ export default function AdminPedidosPage() {
   useEffect(() => {
     let filtered = orders
 
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
@@ -153,7 +149,6 @@ export default function AdminPedidosPage() {
       )
     }
 
-    // Filter by status
     if (statusFilter !== "all") {
       filtered = filtered.filter((order) => order.status === statusFilter)
     }
@@ -211,7 +206,6 @@ export default function AdminPedidosPage() {
           <p className="text-muted-foreground">Acompanhe e gerencie todos os pedidos da UNEAC</p>
         </div>
 
-        {/* Filters */}
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row gap-4">
@@ -246,7 +240,6 @@ export default function AdminPedidosPage() {
           </CardContent>
         </Card>
 
-        {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardHeader className="pb-3">
@@ -278,7 +271,6 @@ export default function AdminPedidosPage() {
           </Card>
         </div>
 
-        {/* Orders Table */}
         <Card>
           <CardHeader>
             <CardTitle>Pedidos ({filteredOrders.length})</CardTitle>
@@ -335,7 +327,6 @@ export default function AdminPedidosPage() {
           </CardContent>
         </Card>
 
-        {/* Order Details Modal */}
         {selectedOrder && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -346,7 +337,6 @@ export default function AdminPedidosPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Customer Info */}
                 <div>
                   <h3 className="font-semibold mb-2">Informações do Cliente</h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
@@ -369,7 +359,6 @@ export default function AdminPedidosPage() {
                   </div>
                 </div>
 
-                {/* Order Items */}
                 <div>
                   <h3 className="font-semibold mb-2">Itens do Pedido</h3>
                   <div className="space-y-2">
@@ -387,7 +376,6 @@ export default function AdminPedidosPage() {
                   </div>
                 </div>
 
-                {/* Total */}
                 <div className="flex justify-between items-center pt-4 border-t">
                   <span className="font-semibold">Total</span>
                   <span className="text-2xl font-bold">R$ {selectedOrder.total.toFixed(2)}</span>

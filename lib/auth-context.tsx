@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
@@ -35,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: null,
     isLoading: true,
   })
+  const loadingRef = useRef(false)
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -76,6 +77,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const loadUserProfile = async (supabaseUser: SupabaseUser) => {
+    if (loadingRef.current) return
+    loadingRef.current = true
+
     console.log("[v0] Loading user profile for:", supabaseUser.id)
     const supabase = createClient()
 
@@ -84,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error || !profile) {
       console.error("[v0] Error loading profile:", error)
       setState({ user: null, isLoading: false })
+      loadingRef.current = false
       return
     }
 
@@ -97,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     console.log("[v0] User profile loaded successfully:", user.email)
     setState({ user, isLoading: false })
+    loadingRef.current = false
   }
 
   const login = async (email: string, password: string): Promise<boolean> => {
