@@ -36,8 +36,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading: true,
   })
   const loadingRef = useRef(false)
+  const initializedRef = useRef(false)
 
   useEffect(() => {
+    if (initializedRef.current) return
+    initializedRef.current = true
+
     if (typeof window === "undefined") {
       setState({ user: null, isLoading: false })
       return

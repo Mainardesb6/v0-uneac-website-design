@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 
 export async function subscribeNewsletter(email: string) {
   try {
+    console.log("[v0] Newsletter subscription attempt for:", email)
     const supabase = await createClient()
 
     const { data, error } = await supabase
@@ -14,18 +15,30 @@ export async function subscribeNewsletter(email: string) {
       .single()
 
     if (error) {
-      // Check if it's a duplicate email error
+      console.error("[v0] Newsletter subscription error:", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      })
+
       if (error.code === "23505") {
         return { success: false, error: "Este e-mail já está cadastrado na nossa newsletter." }
       }
-      console.error("Error subscribing to newsletter:", error)
+
+      if (error.code === "42P01") {
+        console.error("[v0] Table newsletter_subscribers does not exist!")
+        return { success: false, error: "Sistema de newsletter não configurado. Entre em contato com o suporte." }
+      }
+
       return { success: false, error: "Erro ao cadastrar e-mail. Tente novamente." }
     }
 
+    console.log("[v0] Newsletter subscription successful:", data.id)
     revalidatePath("/admin/leads")
     return { success: true, data }
   } catch (error) {
-    console.error("Error subscribing to newsletter:", error)
+    console.error("[v0] Newsletter subscription exception:", error)
     return { success: false, error: "Erro ao cadastrar e-mail. Tente novamente." }
   }
 }
@@ -37,6 +50,7 @@ export async function submitContactMessage(formData: {
   message: string
 }) {
   try {
+    console.log("[v0] Contact message submission attempt from:", formData.email)
     const supabase = await createClient()
 
     const { data, error } = await supabase
@@ -54,14 +68,26 @@ export async function submitContactMessage(formData: {
       .single()
 
     if (error) {
-      console.error("Error submitting contact message:", error)
+      console.error("[v0] Contact message error:", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      })
+
+      if (error.code === "42P01") {
+        console.error("[v0] Table contact_messages does not exist!")
+        return { success: false, error: "Sistema de contato não configurado. Entre em contato com o suporte." }
+      }
+
       return { success: false, error: "Erro ao enviar mensagem. Tente novamente." }
     }
 
+    console.log("[v0] Contact message submitted successfully:", data.id)
     revalidatePath("/admin/leads")
     return { success: true, data }
   } catch (error) {
-    console.error("Error submitting contact message:", error)
+    console.error("[v0] Contact message exception:", error)
     return { success: false, error: "Erro ao enviar mensagem. Tente novamente." }
   }
 }
