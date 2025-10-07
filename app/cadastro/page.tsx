@@ -52,28 +52,46 @@ export default function CadastroPage() {
       return
     }
 
-    const success = await register(
-      formData.name,
-      formData.email,
-      formData.password,
-      formData.cpf || "",
-      formData.phone || "",
-    )
+    try {
+      const success = await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.cpf || "",
+        formData.phone || "",
+      )
 
-    if (success) {
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Verifique seu email para confirmar sua conta antes de fazer login.",
-        duration: 6000,
-      })
-      router.push("/login")
-    } else {
-      setError("Este e-mail já está em uso. Tente fazer login.")
-      toast({
-        title: "Erro no cadastro",
-        description: "Este e-mail já está em uso. Tente fazer login.",
-        variant: "destructive",
-      })
+      if (success) {
+        toast({
+          title: "Conta criada com sucesso!",
+          description: "Verifique seu email para confirmar sua conta antes de fazer login.",
+          duration: 6000,
+        })
+        router.push("/login")
+      }
+    } catch (err: any) {
+      if (err.message === "EMAIL_EXISTS") {
+        setError("Este e-mail já está cadastrado. Tente fazer login ou use outro e-mail.")
+        toast({
+          title: "E-mail já cadastrado",
+          description: "Este e-mail já está em uso. Tente fazer login ou use outro e-mail.",
+          variant: "destructive",
+        })
+      } else if (err.message === "CPF_EXISTS") {
+        setError("Este CPF já está cadastrado. Cada CPF pode ter apenas uma conta.")
+        toast({
+          title: "CPF já cadastrado",
+          description: "Este CPF já está em uso. Cada CPF pode ter apenas uma conta.",
+          variant: "destructive",
+        })
+      } else {
+        setError("Erro ao criar conta. Tente novamente.")
+        toast({
+          title: "Erro no cadastro",
+          description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
+          variant: "destructive",
+        })
+      }
     }
   }
 

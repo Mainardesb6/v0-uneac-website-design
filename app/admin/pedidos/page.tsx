@@ -82,25 +82,40 @@ export default function AdminPedidosPage() {
     const supabase = createClient()
 
     try {
+      console.log("[v0 Admin] Loading orders...")
+
       // Load all orders with items
       const { data: ordersData, error: ordersError } = await supabase
         .from("orders")
         .select("*")
         .order("created_at", { ascending: false })
 
-      if (ordersError) throw ordersError
+      if (ordersError) {
+        console.error("[v0 Admin] Error loading orders:", ordersError)
+        throw ordersError
+      }
+
+      console.log("[v0 Admin] Orders loaded:", ordersData?.length)
 
       // Load order items for each order
       const ordersWithDetails = await Promise.all(
         (ordersData || []).map(async (order) => {
+          console.log("[v0 Admin] Loading details for order:", order.id, "user_id:", order.user_id)
+
           const { data: items } = await supabase.from("order_items").select("*").eq("order_id", order.id)
+          console.log("[v0 Admin] Items loaded for order", order.id, ":", items?.length)
 
           // Load customer data including email from profiles table
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from("profiles")
             .select("name, email, phone, cpf")
             .eq("id", order.user_id)
             .single()
+
+          console.log("[v0 Admin] Profile data for user", order.user_id, ":", profile)
+          if (profileError) {
+            console.error("[v0 Admin] Error loading profile:", profileError)
+          }
 
           return {
             ...order,
@@ -115,10 +130,11 @@ export default function AdminPedidosPage() {
         }),
       )
 
+      console.log("[v0 Admin] Orders with details:", ordersWithDetails)
       setOrders(ordersWithDetails)
       setFilteredOrders(ordersWithDetails)
     } catch (error) {
-      console.error("Erro ao carregar pedidos:", error)
+      console.error("[v0 Admin] Erro ao carregar pedidos:", error)
     } finally {
       setIsLoading(false)
     }

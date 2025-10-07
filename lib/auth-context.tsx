@@ -133,6 +133,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
+    if (cpf && cpf.replace(/\D/g, "").length === 11) {
+      const { data: existingCpf } = await supabase.from("profiles").select("id").eq("cpf", cpf).single()
+
+      if (existingCpf) {
+        console.error("[v0] Registration error: CPF already exists")
+        setState((prev) => ({ ...prev, isLoading: false }))
+        throw new Error("CPF_EXISTS")
+      }
+    }
+
     // Sign up with metadata that will be used by the trigger
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -150,12 +160,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error || !data.user) {
       console.error("[v0] Registration error:", error)
       setState((prev) => ({ ...prev, isLoading: false }))
+      if (error?.message?.includes("already registered")) {
+        throw new Error("EMAIL_EXISTS")
+      }
       return false
     }
 
-    // Note: User needs to confirm email before they can access RLS-protected resources
-    // The profile will be created automatically by the database trigger
-    setState((prev) => ({ ...prev, isLoading: false }))
+    // Profile will be loaded by the auth state change listener
     return true
   }
 
