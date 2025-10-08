@@ -93,12 +93,22 @@ export default function CadastroPage() {
           variant: "destructive",
         })
       } else {
-        setError("Erro ao criar conta. Tente novamente.")
-        toast({
-          title: "Erro no cadastro",
-          description: err.message || "Ocorreu um erro ao criar sua conta. Tente novamente.",
-          variant: "destructive",
-        })
+        const errorMessage = err.message || ""
+        if (errorMessage.includes("row-level security policy") || errorMessage.includes("violates")) {
+          setError("Este CPF ou e-mail já está cadastrado. Cada CPF e e-mail pode ter apenas uma conta.")
+          toast({
+            title: "Dados já cadastrados",
+            description: "Este CPF ou e-mail já está em uso. Tente fazer login ou use outros dados.",
+            variant: "destructive",
+          })
+        } else {
+          setError("Erro ao criar conta. Tente novamente.")
+          toast({
+            title: "Erro no cadastro",
+            description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
+            variant: "destructive",
+          })
+        }
       }
     }
   }
