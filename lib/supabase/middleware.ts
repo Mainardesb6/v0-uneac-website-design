@@ -42,6 +42,7 @@ export async function updateSession(request: NextRequest) {
     "/login",
     "/cadastro",
     "/esqueci-senha",
+    "/update-password", // Added /update-password to allow password reset without authentication
     "/cursos",
     "/cursos-mensais",
     "/contato",
