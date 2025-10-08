@@ -1,36 +1,55 @@
 "use client"
-
-import type React from "react"
-
 import { useState } from "react"
+import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail } from "lucide-react"
-import { subscribeNewsletter } from "@/app/actions/leads"
+import { Mail, Loader2, CheckCircle } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
+
+type NewsletterFormData = {
+  email: string
+}
 
 export function Newsletter() {
-  const [email, setEmail] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<NewsletterFormData>()
+
+  const onSubmit = async (data: NewsletterFormData) => {
     setIsLoading(true)
     setError("")
 
-    const result = await subscribeNewsletter(email)
+    try {
+      const supabase = createClient()
 
-    if (result.success) {
-      setIsSubmitted(true)
-      setEmail("")
-      setTimeout(() => setIsSubmitted(false), 5000)
-    } else {
-      setError(result.error || "Erro ao cadastrar e-mail.")
+      const { error: insertError } = await supabase.from("newsletter_subscribers").insert({ email: data.email })
+
+      if (insertError) {
+        // Check if it's a duplicate email error
+        if (insertError.code === "23505") {
+          setError("Este e-mail já está cadastrado.")
+        } else {
+          throw insertError
+        }
+      } else {
+        setIsSubmitted(true)
+        reset()
+        setTimeout(() => setIsSubmitted(false), 5000)
+      }
+    } catch (err: any) {
+      console.error("[v0] Newsletter subscription error:", err)
+      setError("Erro ao cadastrar e-mail. Tente novamente.")
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }
 
   return (
@@ -51,20 +70,34 @@ export function Newsletter() {
             </CardHeader>
             <CardContent>
               {isSubmitted ? (
-                <div className="text-center py-4">
-                  <div className="text-green-600 font-semibold mb-2">Obrigado por se inscrever!</div>
+                <div className="text-center py-4 space-y-3">
+                  <div className="flex justify-center">
+                    <CheckCircle className="h-12 w-12 text-green-500" />
+                  </div>
+                  <div className="text-green-600 font-semibold text-lg">Obrigado por se inscrever!</div>
                   <p className="text-muted-foreground">Em breve você receberá nossas novidades.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-3">
-                  {error && <div className="text-sm text-red-600 text-center p-2 bg-red-50 rounded">{error}</div>}
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+                  {error && (
+                    <div className="text-sm text-red-600 text-center p-3 bg-red-50 rounded border border-red-200">
+                      {error}
+                    </div>
+                  )}
+                  {errors.email && (
+                    <div className="text-sm text-red-600 text-center p-2 bg-red-50 rounded">{errors.email.message}</div>
+                  )}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Input
                       type="email"
                       placeholder="Seu melhor e-mail"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
+                      {...register("email", {
+                        required: "E-mail é obrigatório",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "E-mail inválido",
+                        },
+                      })}
                       disabled={isLoading}
                       className="flex-1"
                     />
@@ -73,7 +106,14 @@ export function Newsletter() {
                       disabled={isLoading}
                       className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8"
                     >
-                      {isLoading ? "Cadastrando..." : "Inscrever-se"}
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Cadastrando...
+                        </>
+                      ) : (
+                        "Inscrever-se"
+                      )}
                     </Button>
                   </div>
                 </form>

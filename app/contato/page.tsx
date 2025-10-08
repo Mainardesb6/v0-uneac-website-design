@@ -1,8 +1,6 @@
 "use client"
-
-import type React from "react"
-
 import { useState } from "react"
+import { useForm } from "react-hook-form"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
@@ -10,43 +8,56 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, Phone, MapPin } from "lucide-react"
-import { submitContactMessage } from "@/app/actions/leads"
+import { Mail, Phone, MapPin, Loader2, CheckCircle } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
+
+type ContactFormData = {
+  name: string
+  email: string
+  phone?: string
+  message: string
+}
 
 export default function ContatoPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-  })
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ContactFormData>()
+
+  const onSubmit = async (data: ContactFormData) => {
     setIsLoading(true)
     setError("")
 
-    const result = await submitContactMessage(formData)
+    try {
+      const supabase = createClient()
 
-    if (result.success) {
+      const { error: insertError } = await supabase.from("contact_messages").insert({
+        name: data.name,
+        email: data.email,
+        phone: data.phone || null,
+        message: data.message,
+        status: "new",
+      })
+
+      if (insertError) {
+        throw insertError
+      }
+
       setIsSubmitted(true)
-      setFormData({ name: "", email: "", phone: "", message: "" })
+      reset()
       setTimeout(() => setIsSubmitted(false), 5000)
-    } else {
-      setError(result.error || "Erro ao enviar mensagem.")
+    } catch (err: any) {
+      console.error("[v0] Contact form error:", err)
+      setError("Erro ao enviar mensagem. Tente novamente.")
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
   }
 
   return (
@@ -75,61 +86,73 @@ export default function ContatoPage() {
                   </CardHeader>
                   <CardContent>
                     {isSubmitted ? (
-                      <div className="text-center py-8">
-                        <div className="text-green-600 font-semibold mb-2">Mensagem enviada com sucesso!</div>
-                        <p className="text-muted-foreground">Entraremos em contato em breve.</p>
+                      <div className="text-center py-8 space-y-3">
+                        <div className="flex justify-center">
+                          <CheckCircle className="h-12 w-12 text-green-500" />
+                        </div>
+                        <div className="text-green-600 font-semibold text-lg">Mensagem enviada com sucesso!</div>
+                        <p className="text-muted-foreground">Retornaremos em breve.</p>
                       </div>
                     ) : (
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && <div className="text-sm text-red-600 p-3 bg-red-50 rounded">{error}</div>}
+                      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                        {error && (
+                          <div className="text-sm text-red-600 p-3 bg-red-50 rounded border border-red-200">
+                            {error}
+                          </div>
+                        )}
                         <div>
                           <Input
-                            name="name"
                             placeholder="Seu nome completo"
-                            value={formData.name}
-                            onChange={handleChange}
+                            {...register("name", { required: "Nome é obrigatório" })}
                             disabled={isLoading}
-                            required
                           />
+                          {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>}
                         </div>
                         <div>
                           <Input
-                            name="email"
                             type="email"
                             placeholder="Seu e-mail"
-                            value={formData.email}
-                            onChange={handleChange}
+                            {...register("email", {
+                              required: "E-mail é obrigatório",
+                              pattern: {
+                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                message: "E-mail inválido",
+                              },
+                            })}
                             disabled={isLoading}
-                            required
                           />
+                          {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>}
                         </div>
                         <div>
                           <Input
-                            name="phone"
                             type="tel"
                             placeholder="Seu telefone (opcional)"
-                            value={formData.phone}
-                            onChange={handleChange}
+                            {...register("phone")}
                             disabled={isLoading}
                           />
                         </div>
                         <div>
                           <Textarea
-                            name="message"
                             placeholder="Sua mensagem"
                             rows={5}
-                            value={formData.message}
-                            onChange={handleChange}
+                            {...register("message", { required: "Mensagem é obrigatória" })}
                             disabled={isLoading}
-                            required
                           />
+                          {errors.message && <p className="text-sm text-red-600 mt-1">{errors.message.message}</p>}
                         </div>
                         <Button
                           type="submit"
                           disabled={isLoading}
                           className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
                         >
-                          {isLoading ? "Enviando..." : "Enviar Mensagem"}
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Enviando...
+                            </>
+                          ) : (
+                            "Enviar Mensagem"
+                          )}
                         </Button>
                       </form>
                     )}
