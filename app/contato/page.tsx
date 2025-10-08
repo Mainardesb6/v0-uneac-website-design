@@ -1,6 +1,5 @@
 "use client"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useState, type FormEvent } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
@@ -19,46 +18,40 @@ type ContactFormData = {
 }
 
 export default function ContatoPage() {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+  const [message, setMessage] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ContactFormData>()
-
-  const onSubmit = async (data: ContactFormData) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     setIsLoading(true)
     setError("")
 
     try {
       const supabase = createClient()
-
-      console.log("[v0] Contact form submission:", data)
-
       const { error: insertError } = await supabase.from("contact_messages").insert({
-        name: data.name,
-        email: data.email,
-        phone: data.phone || null,
-        message: data.message,
+        name,
+        email,
+        phone: phone || null,
+        message,
         status: "new",
       })
 
-      console.log("[v0] Contact insert result:", insertError ? "Error" : "Success")
-
       if (insertError) {
-        console.error("[v0] Contact insert error:", insertError)
-        throw insertError
+        setError("Erro ao enviar mensagem. Tente novamente.")
+      } else {
+        setIsSubmitted(true)
+        setName("")
+        setEmail("")
+        setPhone("")
+        setMessage("")
+        setTimeout(() => setIsSubmitted(false), 5000)
       }
-
-      setIsSubmitted(true)
-      reset()
-      setTimeout(() => setIsSubmitted(false), 5000)
-    } catch (err: any) {
-      console.error("[v0] Contact form error:", err)
+    } catch (err) {
       setError("Erro ao enviar mensagem. Tente novamente.")
     } finally {
       setIsLoading(false)
@@ -99,52 +92,42 @@ export default function ContatoPage() {
                         <p className="text-muted-foreground">Retornaremos em breve.</p>
                       </div>
                     ) : (
-                      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                      <form onSubmit={handleSubmit} className="space-y-4">
                         {error && (
                           <div className="text-sm text-red-600 p-3 bg-red-50 rounded border border-red-200">
                             {error}
                           </div>
                         )}
-                        <div>
-                          <Input
-                            placeholder="Seu nome completo"
-                            {...register("name", { required: "Nome é obrigatório" })}
-                            disabled={isLoading}
-                          />
-                          {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>}
-                        </div>
-                        <div>
-                          <Input
-                            type="email"
-                            placeholder="Seu e-mail"
-                            {...register("email", {
-                              required: "E-mail é obrigatório",
-                              pattern: {
-                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                message: "E-mail inválido",
-                              },
-                            })}
-                            disabled={isLoading}
-                          />
-                          {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>}
-                        </div>
-                        <div>
-                          <Input
-                            type="tel"
-                            placeholder="Seu telefone (opcional)"
-                            {...register("phone")}
-                            disabled={isLoading}
-                          />
-                        </div>
-                        <div>
-                          <Textarea
-                            placeholder="Sua mensagem"
-                            rows={5}
-                            {...register("message", { required: "Mensagem é obrigatória" })}
-                            disabled={isLoading}
-                          />
-                          {errors.message && <p className="text-sm text-red-600 mt-1">{errors.message.message}</p>}
-                        </div>
+                        <Input
+                          placeholder="Seu nome completo"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          required
+                          disabled={isLoading}
+                        />
+                        <Input
+                          type="email"
+                          placeholder="Seu e-mail"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          disabled={isLoading}
+                        />
+                        <Input
+                          type="tel"
+                          placeholder="Seu telefone (opcional)"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          disabled={isLoading}
+                        />
+                        <Textarea
+                          placeholder="Sua mensagem"
+                          rows={5}
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          required
+                          disabled={isLoading}
+                        />
                         <Button
                           type="submit"
                           disabled={isLoading}
