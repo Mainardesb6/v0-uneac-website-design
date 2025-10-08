@@ -30,13 +30,18 @@ export function Newsletter() {
     try {
       const supabase = createClient()
 
+      console.log("[v0] Newsletter subscription attempt:", data.email)
+
       const { error: insertError } = await supabase.from("newsletter_subscribers").insert({ email: data.email })
+
+      console.log("[v0] Newsletter insert result:", insertError ? "Error" : "Success")
 
       if (insertError) {
         // Check if it's a duplicate email error
         if (insertError.code === "23505") {
           setError("Este e-mail já está cadastrado.")
         } else {
+          console.error("[v0] Newsletter insert error:", insertError)
           throw insertError
         }
       } else {
@@ -84,23 +89,22 @@ export function Newsletter() {
                       {error}
                     </div>
                   )}
-                  {errors.email && (
-                    <div className="text-sm text-red-600 text-center p-2 bg-red-50 rounded">{errors.email.message}</div>
-                  )}
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Input
-                      type="email"
-                      placeholder="Seu melhor e-mail"
-                      {...register("email", {
-                        required: "E-mail é obrigatório",
-                        pattern: {
-                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: "E-mail inválido",
-                        },
-                      })}
-                      disabled={isLoading}
-                      className="flex-1"
-                    />
+                    <div className="flex-1">
+                      <Input
+                        type="email"
+                        placeholder="Seu melhor e-mail"
+                        {...register("email", {
+                          required: "E-mail é obrigatório",
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "E-mail inválido",
+                          },
+                        })}
+                        disabled={isLoading}
+                      />
+                      {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>}
+                    </div>
                     <Button
                       type="submit"
                       disabled={isLoading}

@@ -63,9 +63,13 @@ export default function UpdatePasswordPage() {
     try {
       const supabase = createClient()
 
+      console.log("[v0] Starting password update process")
+
       const {
         data: { session },
       } = await supabase.auth.getSession()
+
+      console.log("[v0] Session check:", session ? "Session exists" : "No session")
 
       if (!session) {
         throw new Error("Sessão inválida. O link pode ter expirado.")
@@ -74,6 +78,8 @@ export default function UpdatePasswordPage() {
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
       })
+
+      console.log("[v0] Password update result:", updateError ? "Error" : "Success")
 
       if (updateError) {
         throw updateError
@@ -85,9 +91,8 @@ export default function UpdatePasswordPage() {
         description: "Você já pode fazer login com sua nova senha.",
       })
 
-      await supabase.auth.signOut()
-
-      setTimeout(() => {
+      setTimeout(async () => {
+        await supabase.auth.signOut()
         router.push("/login")
       }, 2000)
     } catch (err: any) {
@@ -95,7 +100,7 @@ export default function UpdatePasswordPage() {
       setError(err.message || "Erro ao atualizar senha. O link pode ter expirado. Tente solicitar um novo link.")
       toast({
         title: "Erro ao atualizar senha",
-        description: "O link pode ter expirado. Tente solicitar um novo link de redefinição.",
+        description: err.message || "Tente solicitar um novo link de redefinição.",
         variant: "destructive",
       })
     } finally {
