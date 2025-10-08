@@ -91,8 +91,7 @@ export default function UpdatePasswordPage() {
         description: "Você já pode fazer login com sua nova senha.",
       })
 
-      setTimeout(async () => {
-        await supabase.auth.signOut()
+      setTimeout(() => {
         router.push("/login")
       }, 2000)
     } catch (err: any) {

@@ -31,19 +31,31 @@ export default function ContatoPage() {
     setIsLoading(true)
     setError("")
 
+    console.log("[v0 Contact] Starting submission")
+    console.log("[v0 Contact] Data:", { name, email, phone, message })
+
     try {
       const supabase = createClient()
-      const { error: insertError } = await supabase.from("contact_messages").insert({
-        name,
-        email,
-        phone: phone || null,
-        message,
-        status: "new",
-      })
+      console.log("[v0 Contact] Supabase client created")
+
+      const { data, error: insertError } = await supabase
+        .from("contact_messages")
+        .insert({
+          name,
+          email,
+          phone: phone || null,
+          message,
+          status: "new",
+        })
+        .select()
+
+      console.log("[v0 Contact] Insert result:", { data, error: insertError })
 
       if (insertError) {
-        setError("Erro ao enviar mensagem. Tente novamente.")
+        console.error("[v0 Contact] Insert error:", insertError)
+        setError(`Erro ao enviar mensagem: ${insertError.message}`)
       } else {
+        console.log("[v0 Contact] Success!")
         setIsSubmitted(true)
         setName("")
         setEmail("")
@@ -52,6 +64,7 @@ export default function ContatoPage() {
         setTimeout(() => setIsSubmitted(false), 5000)
       }
     } catch (err) {
+      console.error("[v0 Contact] Catch error:", err)
       setError("Erro ao enviar mensagem. Tente novamente.")
     } finally {
       setIsLoading(false)

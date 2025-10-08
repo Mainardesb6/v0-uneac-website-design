@@ -17,22 +17,32 @@ export function Newsletter() {
     setIsLoading(true)
     setError("")
 
+    console.log("[v0 Newsletter] Starting submission")
+    console.log("[v0 Newsletter] Email:", email)
+
     try {
       const supabase = createClient()
-      const { error: insertError } = await supabase.from("newsletter_subscribers").insert({ email })
+      console.log("[v0 Newsletter] Supabase client created")
+
+      const { data, error: insertError } = await supabase.from("newsletter_subscribers").insert({ email }).select()
+
+      console.log("[v0 Newsletter] Insert result:", { data, error: insertError })
 
       if (insertError) {
+        console.error("[v0 Newsletter] Insert error:", insertError)
         if (insertError.code === "23505") {
           setError("Este e-mail já está cadastrado.")
         } else {
-          setError("Erro ao cadastrar e-mail. Tente novamente.")
+          setError(`Erro ao cadastrar e-mail: ${insertError.message}`)
         }
       } else {
+        console.log("[v0 Newsletter] Success!")
         setIsSubmitted(true)
         setEmail("")
         setTimeout(() => setIsSubmitted(false), 5000)
       }
     } catch (err) {
+      console.error("[v0 Newsletter] Catch error:", err)
       setError("Erro ao cadastrar e-mail. Tente novamente.")
     } finally {
       setIsLoading(false)
