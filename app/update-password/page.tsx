@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, Lock, CheckCircle } from "lucide-react"
+import { Loader2, Lock, CheckCircle, AlertCircle } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 export default function UpdatePasswordPage() {
@@ -20,8 +20,24 @@ export default function UpdatePasswordPage() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [linkExpired, setLinkExpired] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error")
+    const errorCode = searchParams.get("error_code")
+    const errorDescription = searchParams.get("error_description")
+
+    if (errorParam === "access_denied" && errorCode === "otp_expired") {
+      setLinkExpired(true)
+      setError("O link de redefinição de senha expirou ou é inválido. Solicite um novo link.")
+    } else if (errorParam) {
+      setLinkExpired(true)
+      setError(errorDescription || "Link inválido. Solicite um novo link de redefinição.")
+    }
+  }, [searchParams])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -86,21 +102,47 @@ export default function UpdatePasswordPage() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-primary mb-2">Redefinir Senha</h1>
             <p className="text-muted-foreground">
-              {isSuccess ? "Senha atualizada com sucesso!" : "Digite sua nova senha"}
+              {isSuccess ? "Senha atualizada com sucesso!" : linkExpired ? "Link expirado" : "Digite sua nova senha"}
             </p>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>{isSuccess ? "Sucesso!" : "Nova Senha"}</CardTitle>
+              <CardTitle>{isSuccess ? "Sucesso!" : linkExpired ? "Link Expirado" : "Nova Senha"}</CardTitle>
               <CardDescription>
                 {isSuccess
                   ? "Você será redirecionado para a página de login"
-                  : "Escolha uma senha forte com no mínimo 6 caracteres"}
+                  : linkExpired
+                    ? "Solicite um novo link de redefinição de senha"
+                    : "Escolha uma senha forte com no mínimo 6 caracteres"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isSuccess ? (
+              {linkExpired ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center p-6">
+                    <AlertCircle className="h-16 w-16 text-destructive" />
+                  </div>
+                  <div className="bg-destructive/10 text-destructive text-sm p-4 rounded-md border border-destructive/20 text-center">
+                    {error}
+                  </div>
+                  <p className="text-center text-muted-foreground text-sm">
+                    Os links de redefinição de senha expiram após 1 hora por segurança. Solicite um novo link para
+                    continuar.
+                  </p>
+                  <Button
+                    onClick={() => router.push("/esqueci-senha")}
+                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                  >
+                    Solicitar Novo Link
+                  </Button>
+                  <div className="text-center">
+                    <Link href="/login" className="text-sm text-primary hover:underline">
+                      Voltar para o login
+                    </Link>
+                  </div>
+                </div>
+              ) : isSuccess ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-center p-6">
                     <CheckCircle className="h-16 w-16 text-green-500" />
