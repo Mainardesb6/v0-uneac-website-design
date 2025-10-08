@@ -63,36 +63,11 @@ export default function UpdatePasswordPage() {
     try {
       const supabase = createClient()
 
-      console.log("[v0] Starting password update process")
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      console.log("[v0] Session check:", session ? "Session exists" : "No session")
-      if (session) {
-        console.log("[v0] User ID:", session.user.id)
-        console.log("[v0] User email:", session.user.email)
-        console.log("[v0] Session expires at:", session.expires_at)
-      }
-
-      if (!session) {
-        throw new Error("Sessão inválida. O link pode ter expirado.")
-      }
-
-      console.log("[v0] Attempting to update password for user:", session.user.email)
-
-      const { data: updateData, error: updateError } = await supabase.auth.updateUser({
+      const { error: updateError } = await supabase.auth.updateUser({
         password: password,
       })
 
-      console.log("[v0] Password update result:", updateError ? "Error" : "Success")
-      if (updateData) {
-        console.log("[v0] Updated user ID:", updateData.user?.id)
-        console.log("[v0] Updated user email:", updateData.user?.email)
-      }
       if (updateError) {
-        console.error("[v0] Update error details:", updateError)
         throw updateError
       }
 
@@ -102,12 +77,10 @@ export default function UpdatePasswordPage() {
         description: "Você já pode fazer login com sua nova senha.",
       })
 
-      console.log("[v0] Password updated successfully, redirecting to login in 3 seconds...")
       setTimeout(() => {
         router.push("/login")
-      }, 3000)
+      }, 2000)
     } catch (err: any) {
-      console.error("[v0] Error updating password:", err)
       setError(err.message || "Erro ao atualizar senha. O link pode ter expirado. Tente solicitar um novo link.")
       toast({
         title: "Erro ao atualizar senha",

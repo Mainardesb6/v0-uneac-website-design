@@ -38,18 +38,15 @@ export default function ContatoPage() {
       const supabase = createClient()
       console.log("[v0 Contact] Supabase client created")
 
-      const { data, error: insertError } = await supabase
-        .from("contact_messages")
-        .insert({
-          name,
-          email,
-          phone: phone || null,
-          message,
-          status: "new",
-        })
-        .select()
+      const { error: insertError } = await supabase.from("contact_messages").insert({
+        name,
+        email,
+        phone: phone || null,
+        message,
+        status: "new",
+      })
 
-      console.log("[v0 Contact] Insert result:", { data, error: insertError })
+      console.log("[v0 Contact] Insert result:", { insertError })
 
       if (insertError) {
         console.error("[v0 Contact] Insert error:", insertError)
