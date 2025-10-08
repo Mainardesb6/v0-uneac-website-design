@@ -45,27 +45,29 @@ export default function LeadsPage() {
   async function loadData() {
     setIsLoading(true)
 
-    // Load newsletter subscribers
+    console.log("[v0] Loading newsletter subscribers...")
     const { data: subscribersData, error: subscribersError } = await supabase
       .from("newsletter_subscribers")
       .select("*")
-      .order("subscribed_at", { ascending: false })
+      .order("created_at", { ascending: false })
 
     if (subscribersError) {
-      console.error("Error loading subscribers:", subscribersError)
+      console.error("[v0] Error loading subscribers:", subscribersError)
     } else {
+      console.log("[v0] Subscribers loaded:", subscribersData?.length || 0)
       setSubscribers(subscribersData || [])
     }
 
-    // Load contact messages
+    console.log("[v0] Loading contact messages...")
     const { data: messagesData, error: messagesError } = await supabase
       .from("contact_messages")
       .select("*")
       .order("created_at", { ascending: false })
 
     if (messagesError) {
-      console.error("Error loading messages:", messagesError)
+      console.error("[v0] Error loading messages:", messagesError)
     } else {
+      console.log("[v0] Messages loaded:", messagesData?.length || 0)
       setMessages(messagesData || [])
     }
 
@@ -89,7 +91,7 @@ export default function LeadsPage() {
   }
 
   const newMessagesCount = messages.filter((m) => m.status === "new").length
-  const activeSubscribersCount = subscribers.filter((s) => s.status === "active").length
+  const activeSubscribersCount = subscribers.filter((s) => s.status === "active" || !s.status).length
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -275,14 +277,20 @@ export default function LeadsPage() {
                             <tr key={subscriber.id} className="border-b hover:bg-muted/50">
                               <td className="py-3 px-4">{subscriber.email}</td>
                               <td className="py-3 px-4">
-                                {new Date(subscriber.subscribed_at).toLocaleDateString("pt-BR")}
+                                {new Date(subscriber.subscribed_at || subscriber.created_at).toLocaleDateString(
+                                  "pt-BR",
+                                )}
                               </td>
                               <td className="py-3 px-4">
-                                <Badge variant={subscriber.status === "active" ? "default" : "secondary"}>
-                                  {subscriber.status === "active" ? "Ativo" : "Inativo"}
+                                <Badge
+                                  variant={
+                                    subscriber.status === "active" || !subscriber.status ? "default" : "secondary"
+                                  }
+                                >
+                                  {subscriber.status === "active" || !subscriber.status ? "Ativo" : "Inativo"}
                                 </Badge>
                               </td>
-                              <td className="py-3 px-4 capitalize">{subscriber.source}</td>
+                              <td className="py-3 px-4 capitalize">{subscriber.source || "website"}</td>
                             </tr>
                           ))}
                         </tbody>
