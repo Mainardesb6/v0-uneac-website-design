@@ -121,6 +121,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false
     }
 
+    const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single()
+
+    if (!profile) {
+      setState({ user: null, isLoading: false })
+      return false
+    }
+
+    const user: User = {
+      id: data.user.id,
+      name: profile.name,
+      email: data.user.email!,
+      cpf: profile.cpf,
+      phone: profile.phone,
+    }
+
+    setState({ user, isLoading: false })
     return true
   }
 
