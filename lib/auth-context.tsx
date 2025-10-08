@@ -151,9 +151,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
-    // CRITICAL: Check CPF exists BEFORE creating user
+    // Verifica se CPF já existe ANTES de criar o usuário
     if (cpf && cpf.replace(/\D/g, "").length === 11) {
-      const formattedCpf = cpf.replace(/\D/g, "")
       const { data: existingCpf } = await supabase.from("profiles").select("cpf").eq("cpf", cpf).maybeSingle()
 
       if (existingCpf) {
@@ -162,20 +161,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Create user in auth
+    // Cria usuário no auth.users e passa os metadados
+    // O trigger handle_new_user() criará automaticamente o perfil
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        // Passa os dados extras que serão capturados pelo trigger
+        data: {
+          full_name: name,
+          cpf: cpf || "",
+          phone: phone || "",
+        },
+        // URL para onde o usuário será redirecionado após confirmar o email
         emailRedirectTo: `${window.location.origin}/login`,
       },
     })
 
     if (error) {
       setState((prev) => ({ ...prev, isLoading: false }))
+
+      // Trata erros específicos
       if (error.message.includes("already registered") || error.message.includes("User already registered")) {
         throw new Error("EMAIL_EXISTS")
       }
+
       throw error
     }
 
@@ -184,20 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false
     }
 
-    // Create profile immediately after user creation
-    const { error: profileError } = await supabase.from("profiles").insert({
-      id: data.user.id,
-      name,
-      email,
-      cpf: cpf || null,
-      phone: phone || null,
-    })
-
-    if (profileError) {
-      setState((prev) => ({ ...prev, isLoading: false }))
-      throw profileError
-    }
-
+    // Sucesso! O trigger já criou o perfil automaticamente
     setState((prev) => ({ ...prev, isLoading: false }))
     return true
   }
