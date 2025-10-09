@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Search, Eye, RefreshCw } from "lucide-react"
+import { getOrdersWithProfiles } from "../actions"
 
 interface OrderItem {
   id: number
@@ -82,52 +83,9 @@ export default function AdminPedidosPage() {
 
   async function loadOrders() {
     setIsLoading(true)
-    const supabase = createClient()
 
     try {
-      console.log("[v0 Admin] Loading orders...")
-
-      const { data: ordersData, error: ordersError } = await supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false })
-
-      if (ordersError) {
-        console.error("[v0 Admin] Error loading orders:", ordersError)
-        throw ordersError
-      }
-
-      console.log("[v0 Admin] Orders loaded:", ordersData?.length)
-
-      const ordersWithDetails = await Promise.all(
-        (ordersData || []).map(async (order) => {
-          console.log("[v0 Admin] Loading details for order:", order.id, "user_id:", order.user_id)
-
-          const { data: items } = await supabase.from("order_items").select("*").eq("order_id", order.id)
-          console.log("[v0 Admin] Items loaded for order", order.id, ":", items?.length)
-
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("name, email, phone, cpf")
-            .eq("id", order.user_id)
-            .single()
-
-          console.log("[v0 Admin] Profile data for user", order.user_id, ":", profile)
-
-          return {
-            ...order,
-            items: items || [],
-            customer: {
-              name: profile?.name || "N/A",
-              email: profile?.email || "N/A",
-              phone: profile?.phone || "N/A",
-              cpf: profile?.cpf || "N/A",
-            },
-          }
-        }),
-      )
-
-      console.log("[v0 Admin] Orders with details:", ordersWithDetails)
+      const ordersWithDetails = await getOrdersWithProfiles()
       setOrders(ordersWithDetails)
       setFilteredOrders(ordersWithDetails)
     } catch (error) {
