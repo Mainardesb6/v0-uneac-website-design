@@ -162,16 +162,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
+    console.log("[v0] Registration attempt for:", email)
+
     // CRITICAL: Check CPF exists BEFORE creating user
     if (cpf && cpf.replace(/\D/g, "").length === 11) {
       const formattedCpf = cpf.replace(/\D/g, "")
-      const { data: existingCpf } = await supabase.from("profiles").select("cpf").eq("cpf", cpf).maybeSingle()
+      console.log("[v0] Checking if CPF exists:", formattedCpf)
+
+      const { data: existingCpf, error: cpfCheckError } = await supabase
+        .from("profiles")
+        .select("cpf")
+        .eq("cpf", cpf)
+        .maybeSingle()
+
+      if (cpfCheckError) {
+        console.log("[v0] Error checking CPF:", cpfCheckError.message)
+      }
 
       if (existingCpf) {
+        console.log("[v0] CPF already exists")
         setState((prev) => ({ ...prev, isLoading: false }))
         throw new Error("CPF_EXISTS")
       }
     }
+
+    console.log("[v0] Creating user in auth...")
 
     // Create user in auth
     const { data, error } = await supabase.auth.signUp({
@@ -183,6 +198,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     if (error) {
+      console.log("[v0] Auth signup error:", error.message)
       setState((prev) => ({ ...prev, isLoading: false }))
       if (error.message.includes("already registered") || error.message.includes("User already registered")) {
         throw new Error("EMAIL_EXISTS")
@@ -191,9 +207,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!data.user) {
+      console.log("[v0] No user data returned from signup")
       setState((prev) => ({ ...prev, isLoading: false }))
       return false
     }
+
+    console.log("[v0] User created successfully:", data.user.id)
+    console.log("[v0] Creating profile in database...")
 
     // Create profile immediately after user creation
     const { error: profileError } = await supabase.from("profiles").insert({
@@ -205,10 +225,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     if (profileError) {
+      console.log("[v0] Profile creation error:", profileError.message)
+      console.log("[v0] Profile error details:", profileError)
       setState((prev) => ({ ...prev, isLoading: false }))
       throw profileError
     }
 
+    console.log("[v0] Profile created successfully")
     setState((prev) => ({ ...prev, isLoading: false }))
     return true
   }
