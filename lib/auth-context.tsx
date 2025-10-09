@@ -100,16 +100,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
+    console.log("[v0] Login attempt for:", email)
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
     if (error) {
+      console.log("[v0] Login error:", error.message)
+      console.log("[v0] Error code:", error.status)
       setState((prev) => ({ ...prev, isLoading: false }))
 
       // Check if email is not confirmed
       if (error.message.includes("Email not confirmed")) {
+        console.log("[v0] Email not confirmed error detected")
         throw new Error("EMAIL_NOT_CONFIRMED")
       }
 
@@ -117,16 +122,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!data.user) {
+      console.log("[v0] No user data returned")
       setState((prev) => ({ ...prev, isLoading: false }))
       return false
     }
 
+    console.log("[v0] Login successful, loading profile for user:", data.user.id)
+
     const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single()
 
     if (!profile) {
+      console.log("[v0] Profile not found for user:", data.user.id)
       setState({ user: null, isLoading: false })
       return false
     }
+
+    console.log("[v0] Profile loaded successfully:", profile.name)
 
     const user: User = {
       id: data.user.id,
