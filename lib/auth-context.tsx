@@ -100,16 +100,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
-    console.log("[v0] Login attempt for:", email)
+    console.log("[v0] ========== LOGIN ATTEMPT ==========")
+    console.log("[v0] Email:", email)
+    console.log("[v0] Password length:", password.length)
+    console.log("[v0] Timestamp:", new Date().toISOString())
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
+    console.log("[v0] Supabase response received")
+    console.log("[v0] Error:", error)
+    console.log("[v0] Data:", data)
+
     if (error) {
-      console.log("[v0] Login error:", error.message)
+      console.log("[v0] ========== LOGIN ERROR ==========")
+      console.log("[v0] Error message:", error.message)
       console.log("[v0] Error code:", error.status)
+      console.log("[v0] Error name:", error.name)
+      console.log("[v0] Full error object:", JSON.stringify(error, null, 2))
       setState((prev) => ({ ...prev, isLoading: false }))
 
       // Check if email is not confirmed
@@ -122,22 +132,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!data.user) {
-      console.log("[v0] No user data returned")
+      console.log("[v0] ========== NO USER DATA ==========")
+      console.log("[v0] No user data returned from Supabase")
       setState((prev) => ({ ...prev, isLoading: false }))
       return false
     }
 
-    console.log("[v0] Login successful, loading profile for user:", data.user.id)
+    console.log("[v0] ========== LOGIN SUCCESSFUL ==========")
+    console.log("[v0] User ID:", data.user.id)
+    console.log("[v0] User email:", data.user.email)
+    console.log("[v0] Email confirmed at:", data.user.email_confirmed_at)
+    console.log("[v0] Loading profile...")
 
-    const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single()
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user.id)
+      .single()
+
+    if (profileError) {
+      console.log("[v0] ========== PROFILE ERROR ==========")
+      console.log("[v0] Profile error:", profileError.message)
+      console.log("[v0] Profile error code:", profileError.code)
+      setState({ user: null, isLoading: false })
+      return false
+    }
 
     if (!profile) {
+      console.log("[v0] ========== PROFILE NOT FOUND ==========")
       console.log("[v0] Profile not found for user:", data.user.id)
       setState({ user: null, isLoading: false })
       return false
     }
 
-    console.log("[v0] Profile loaded successfully:", profile.name)
+    console.log("[v0] ========== PROFILE LOADED ==========")
+    console.log("[v0] Profile name:", profile.name)
+    console.log("[v0] Profile CPF:", profile.cpf)
+    console.log("[v0] Profile phone:", profile.phone)
 
     const user: User = {
       id: data.user.id,
@@ -148,6 +179,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setState({ user, isLoading: false })
+    console.log("[v0] ========== LOGIN COMPLETE ==========")
     return true
   }
 
