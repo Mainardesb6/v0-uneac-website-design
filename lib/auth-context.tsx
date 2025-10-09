@@ -164,7 +164,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     console.log("[v0] Registration attempt for:", email)
 
-    // CRITICAL: Check CPF exists BEFORE creating user
     if (cpf && cpf.replace(/\D/g, "").length === 11) {
       const formattedCpf = cpf.replace(/\D/g, "")
       console.log("[v0] Checking if CPF exists:", formattedCpf)
@@ -188,12 +187,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     console.log("[v0] Creating user in auth...")
 
-    // Create user in auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/login`,
+        data: {
+          name,
+          cpf: cpf || null,
+          phone: phone || null,
+        },
       },
     })
 
@@ -213,25 +216,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     console.log("[v0] User created successfully:", data.user.id)
-    console.log("[v0] Creating profile in database...")
+    console.log("[v0] Profile will be created automatically by trigger")
 
-    // Create profile immediately after user creation
-    const { error: profileError } = await supabase.from("profiles").insert({
-      id: data.user.id,
-      name,
-      email,
-      cpf: cpf || null,
-      phone: phone || null,
-    })
-
-    if (profileError) {
-      console.log("[v0] Profile creation error:", profileError.message)
-      console.log("[v0] Profile error details:", profileError)
-      setState((prev) => ({ ...prev, isLoading: false }))
-      throw profileError
-    }
-
-    console.log("[v0] Profile created successfully")
     setState((prev) => ({ ...prev, isLoading: false }))
     return true
   }
