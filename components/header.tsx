@@ -69,7 +69,7 @@ export function Header() {
       <header className="sticky top-0 z-50 w-full border-b bg-background backdrop-blur supports-[backdrop-filter]:bg-background/95">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center p-2 rounded-lg bg-white/90 shadow-sm">
-            <Image src="/images/uneac-logo.png" alt="UNEAC" width={120} height={40} className="h-10 w-auto" priority />
+            <Image src="/images/uneac-logo.jpg" alt="UNEAC" width={120} height={40} className="h-10 w-auto" priority />
           </Link>
 
           {/* Desktop Navigation */}

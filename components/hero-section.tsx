@@ -8,7 +8,7 @@ export function HeroSection() {
       {/* Background with gradient */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-background to-accent/10">
         <div className="absolute inset-0 flex items-center justify-center opacity-5">
-          <img src="/uneac-logo.svg" alt="" className="w-[800px] h-auto" />
+          <img src="/uneac-logo.jpg" alt="" className="w-[800px] h-auto" />
         </div>
       </div>
 
