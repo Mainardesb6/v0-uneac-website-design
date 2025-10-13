@@ -7,6 +7,7 @@ import { CartProvider } from "@/lib/cart-context"
 import { AuthProvider } from "@/lib/auth-context"
 import { OrdersProvider } from "@/lib/orders-context"
 import { Toaster } from "@/components/toaster"
+import { CookieBanner } from "@/components/cookie-banner"
 import "./globals.css"
 
 const inter = Inter({
@@ -46,6 +47,7 @@ export default function RootLayout({
             <CartProvider>
               <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
               <Toaster />
+              <CookieBanner />
             </CartProvider>
           </OrdersProvider>
         </AuthProvider>
