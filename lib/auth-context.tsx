@@ -100,31 +100,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
-    console.log("[v0] ========== LOGIN ATTEMPT ==========")
-    console.log("[v0] Email:", email)
-    console.log("[v0] Password length:", password.length)
-    console.log("[v0] Timestamp:", new Date().toISOString())
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    console.log("[v0] Supabase response received")
-    console.log("[v0] Error:", error)
-    console.log("[v0] Data:", data)
-
     if (error) {
-      console.log("[v0] ========== LOGIN ERROR ==========")
-      console.log("[v0] Error message:", error.message)
-      console.log("[v0] Error code:", error.status)
-      console.log("[v0] Error name:", error.name)
-      console.log("[v0] Full error object:", JSON.stringify(error, null, 2))
       setState((prev) => ({ ...prev, isLoading: false }))
 
-      // Check if email is not confirmed
       if (error.message.includes("Email not confirmed")) {
-        console.log("[v0] Email not confirmed error detected")
         throw new Error("EMAIL_NOT_CONFIRMED")
       }
 
@@ -132,17 +116,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!data.user) {
-      console.log("[v0] ========== NO USER DATA ==========")
-      console.log("[v0] No user data returned from Supabase")
       setState((prev) => ({ ...prev, isLoading: false }))
       return false
     }
-
-    console.log("[v0] ========== LOGIN SUCCESSFUL ==========")
-    console.log("[v0] User ID:", data.user.id)
-    console.log("[v0] User email:", data.user.email)
-    console.log("[v0] Email confirmed at:", data.user.email_confirmed_at)
-    console.log("[v0] Loading profile...")
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
@@ -151,24 +127,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .single()
 
     if (profileError) {
-      console.log("[v0] ========== PROFILE ERROR ==========")
-      console.log("[v0] Profile error:", profileError.message)
-      console.log("[v0] Profile error code:", profileError.code)
       setState({ user: null, isLoading: false })
       return false
     }
 
     if (!profile) {
-      console.log("[v0] ========== PROFILE NOT FOUND ==========")
-      console.log("[v0] Profile not found for user:", data.user.id)
       setState({ user: null, isLoading: false })
       return false
     }
-
-    console.log("[v0] ========== PROFILE LOADED ==========")
-    console.log("[v0] Profile name:", profile.name)
-    console.log("[v0] Profile CPF:", profile.cpf)
-    console.log("[v0] Profile phone:", profile.phone)
 
     const user: User = {
       id: data.user.id,
@@ -179,7 +145,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setState({ user, isLoading: false })
-    console.log("[v0] ========== LOGIN COMPLETE ==========")
     return true
   }
 
@@ -194,11 +159,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
-    console.log("[v0] Registration attempt for:", email)
-
     if (cpf && cpf.replace(/\D/g, "").length === 11) {
       const formattedCpf = cpf.replace(/\D/g, "")
-      console.log("[v0] Checking if CPF exists:", formattedCpf)
 
       const { data: existingCpf, error: cpfCheckError } = await supabase
         .from("profiles")
@@ -211,13 +173,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (existingCpf) {
-        console.log("[v0] CPF already exists")
         setState((prev) => ({ ...prev, isLoading: false }))
         throw new Error("CPF_EXISTS")
       }
     }
-
-    console.log("[v0] Creating user in auth...")
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -233,7 +192,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     if (error) {
-      console.log("[v0] Auth signup error:", error.message)
       setState((prev) => ({ ...prev, isLoading: false }))
       if (error.message.includes("already registered") || error.message.includes("User already registered")) {
         throw new Error("EMAIL_EXISTS")
@@ -242,13 +200,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!data.user) {
-      console.log("[v0] No user data returned from signup")
       setState((prev) => ({ ...prev, isLoading: false }))
       return false
     }
-
-    console.log("[v0] User created successfully:", data.user.id)
-    console.log("[v0] Profile will be created automatically by trigger")
 
     setState((prev) => ({ ...prev, isLoading: false }))
     return true

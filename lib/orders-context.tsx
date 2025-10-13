@@ -29,11 +29,6 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
 
   const createOrder = async (userId: string, items: CartItem[], total: number): Promise<Order> => {
-    console.log("[v0] ========== CREATING ORDER ==========")
-    console.log("[v0] User ID:", userId)
-    console.log("[v0] Items count:", items.length)
-    console.log("[v0] Total:", total)
-
     const orderId = Math.random().toString(36).substr(2, 6).toUpperCase()
 
     const { error: orderError } = await supabase.from("orders").insert({
@@ -73,17 +68,12 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date(),
     }
 
-    console.log("[v0] Order created successfully:", order.id)
-
     setOrders((prev) => [order, ...prev])
 
     return order
   }
 
   const getOrdersByUser = async (userId: string): Promise<Order[]> => {
-    console.log("[v0] ========== GETTING USER ORDERS ==========")
-    console.log("[v0] User ID:", userId)
-
     const { data: ordersData, error: ordersError } = await supabase
       .from("orders")
       .select("*")
@@ -96,7 +86,6 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!ordersData || ordersData.length === 0) {
-      console.log("[v0] No orders found")
       return []
     }
 
@@ -133,8 +122,6 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     )
 
     const validOrders = ordersWithItems.filter((order): order is Order => order !== null)
-
-    console.log("[v0] Orders found:", validOrders.length)
 
     setOrders(validOrders)
 
