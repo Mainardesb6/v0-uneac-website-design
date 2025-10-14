@@ -4,16 +4,13 @@ import { CheckCircle2, Users } from "lucide-react"
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-white">
-      {/* Background split with diagonal accent */}
+    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-[#003366]">
+      {/* Background with cyan diagonal accent in top right */}
       <div className="absolute inset-0 z-0">
-        {/* Blue background (left side) */}
-        <div className="absolute inset-0 bg-[#003366]" style={{ clipPath: "polygon(0 0, 62% 0, 52% 100%, 0 100%)" }} />
-
-        {/* Cyan diagonal accent */}
+        {/* Cyan diagonal accent - top right corner */}
         <div
-          className="absolute inset-0 bg-[#00AEEF]"
-          style={{ clipPath: "polygon(52% 0, 62% 0, 52% 100%, 42% 100%)" }}
+          className="absolute top-0 right-0 w-1/2 h-full bg-[#00AEEF]"
+          style={{ clipPath: "polygon(40% 0, 100% 0, 100% 100%, 70% 100%)" }}
         />
       </div>
 
@@ -26,31 +23,33 @@ export function HeroSection() {
               A Excelência que seu Futuro Profissional Exige
             </h1>
 
-            {/* MEC Badge */}
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#00AEEF] flex items-center justify-center">
-                <CheckCircle2 className="w-7 h-7 text-white" strokeWidth={3} />
+            <div className="flex flex-wrap items-center gap-6 lg:gap-8">
+              {/* MEC Badge */}
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-14 h-14 rounded-full bg-[#00AEEF] flex items-center justify-center ring-4 ring-[#00AEEF]/20">
+                  <CheckCircle2 className="w-8 h-8 text-white" strokeWidth={3} />
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm leading-tight">Instituição</p>
+                  <p className="text-white font-semibold text-sm leading-tight">Credenciada MEC</p>
+                </div>
               </div>
-              <div>
-                <p className="text-white font-semibold text-lg">Instituição</p>
-                <p className="text-white font-semibold text-lg">Credenciada MEC</p>
-              </div>
-            </div>
 
-            {/* Social Proof */}
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-2">
-                <div className="w-10 h-10 rounded-full bg-[#00AEEF] border-2 border-[#003366] flex items-center justify-center">
-                  <Users className="w-5 h-5 text-white" />
+              {/* Social Proof */}
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-2">
+                  <div className="w-10 h-10 rounded-full bg-white border-2 border-[#003366] flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#003366]" />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-white border-2 border-[#003366] flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#003366]" />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-white border-2 border-[#003366] flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#003366]" />
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-[#00AEEF] border-2 border-[#003366] flex items-center justify-center">
-                  <Users className="w-5 h-5 text-white" />
-                </div>
-                <div className="w-10 h-10 rounded-full bg-[#00AEEF] border-2 border-[#003366] flex items-center justify-center">
-                  <Users className="w-5 h-5 text-white" />
-                </div>
+                <p className="text-white font-semibold text-lg">+10.000 Alunos Formados</p>
               </div>
-              <p className="text-white font-semibold text-xl">+10.000 Alunos Formados</p>
             </div>
 
             {/* Supporting Text */}
@@ -71,7 +70,7 @@ export function HeroSection() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="border-2 border-[#00AEEF] text-white hover:bg-[#00AEEF]/10 font-semibold px-8 py-6 text-base bg-transparent"
+                className="border-2 border-white text-white hover:bg-white/10 font-semibold px-8 py-6 text-base bg-transparent"
               >
                 <Link href="/cursos">Ver Todos os Cursos</Link>
               </Button>
@@ -81,7 +80,11 @@ export function HeroSection() {
           {/* Right Column - Professional Image */}
           <div className="relative lg:flex justify-end items-center hidden">
             <div className="relative w-full max-w-md">
-              <img src="/professional-woman-in-business-suit-with-arms-cros.jpg" alt="Profissional UNEAC" className="w-full h-auto object-contain" />
+              <img
+                src="/professional-woman-gray-suit.jpg"
+                alt="Profissional UNEAC"
+                className="w-full h-auto object-contain"
+              />
             </div>
           </div>
         </div>
