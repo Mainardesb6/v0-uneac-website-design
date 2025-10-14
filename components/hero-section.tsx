@@ -1,67 +1,91 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { GraduationCap, Award, TrendingUp } from "lucide-react"
+import { CheckCircle2, Users } from "lucide-react"
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
-      {/* Background with gradient */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-background to-accent/10">
-        <div className="absolute inset-0 flex items-center justify-center opacity-5">
-          <img src="/uneac-logo.jpg" alt="" className="w-[800px] h-auto" />
-        </div>
+    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-white">
+      {/* Background split with diagonal accent */}
+      <div className="absolute inset-0 z-0">
+        {/* Blue background (left side) */}
+        <div className="absolute inset-0 bg-[#003366]" style={{ clipPath: "polygon(0 0, 62% 0, 52% 100%, 0 100%)" }} />
+
+        {/* Cyan diagonal accent */}
+        <div
+          className="absolute inset-0 bg-[#00AEEF]"
+          style={{ clipPath: "polygon(52% 0, 62% 0, 52% 100%, 42% 100%)" }}
+        />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4">
-            <Award className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Mais de 10 mil alunos formados</span>
+      {/* Content Container */}
+      <div className="relative z-10 container mx-auto px-4 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-8 items-center min-h-[85vh]">
+          {/* Left Column - Text Content */}
+          <div className="space-y-6 lg:space-y-8 py-12 lg:py-0">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white text-balance">
+              A Excelência que seu Futuro Profissional Exige
+            </h1>
+
+            {/* MEC Badge */}
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#00AEEF] flex items-center justify-center">
+                <CheckCircle2 className="w-7 h-7 text-white" strokeWidth={3} />
+              </div>
+              <div>
+                <p className="text-white font-semibold text-lg">Instituição</p>
+                <p className="text-white font-semibold text-lg">Credenciada MEC</p>
+              </div>
+            </div>
+
+            {/* Social Proof */}
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
+                <div className="w-10 h-10 rounded-full bg-[#00AEEF] border-2 border-[#003366] flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-[#00AEEF] border-2 border-[#003366] flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-[#00AEEF] border-2 border-[#003366] flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <p className="text-white font-semibold text-xl">+10.000 Alunos Formados</p>
+            </div>
+
+            {/* Supporting Text */}
+            <p className="text-white/90 text-lg lg:text-xl leading-relaxed max-w-xl">
+              Cursos de ponta com certificado para você se destacar no mercado.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button
+                asChild
+                size="lg"
+                className="bg-[#00AEEF] hover:bg-[#00AEEF]/90 text-white font-semibold px-8 py-6 text-base shadow-lg hover:shadow-xl transition-all"
+              >
+                <Link href="/cursos">Quero Transformar Minha Carreira</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-2 border-[#00AEEF] text-white hover:bg-[#00AEEF]/10 font-semibold px-8 py-6 text-base bg-transparent"
+              >
+                <Link href="/cursos">Ver Todos os Cursos</Link>
+              </Button>
+            </div>
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight text-balance text-foreground">
-            Transforme Sua Carreira com Cursos de <span className="text-primary">Excelência</span>
-          </h1>
-
-          <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed text-pretty">
-            Certificados reconhecidos pelo MEC. Estude no seu ritmo, de qualquer lugar. Professores mestres e doutores.
-            Invista no seu futuro profissional hoje.
-          </p>
-
-          {/* Benefits highlights */}
-          <div className="flex flex-wrap justify-center gap-6 pt-4">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">Certificado reconhecido pelo MEC</span>
+          {/* Right Column - Professional Image */}
+          <div className="relative lg:flex justify-end items-center hidden">
+            <div className="relative w-full max-w-md">
+              <img src="/professional-woman-in-business-suit-with-arms-cros.jpg" alt="Profissional UNEAC" className="w-full h-auto object-contain" />
             </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">Progressão de Carreira</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">Horas Complementares</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
-            <Button
-              asChild
-              size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
-            >
-              <Link href="/cursos">Encontre Seu Curso Agora</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="font-semibold px-8 py-6 text-lg bg-transparent">
-              <Link href="/nossa-equipe">Conheça Nossa Equipe</Link>
-            </Button>
           </div>
         </div>
       </div>
-
-      {/* Decorative gradient at bottom */}
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   )
 }
