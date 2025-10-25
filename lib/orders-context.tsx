@@ -28,7 +28,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([])
   const supabase = createClient()
 
-  const createOrder = async (userId: string, items: CartItem[], total: number): Promise<Order> {
+  const createOrder = async (userId: string, items: CartItem[], total: number) => {
     const orderId = Math.random().toString(36).substr(2, 6).toUpperCase()
 
     const { error: orderError } = await supabase.from("orders").insert({
@@ -73,7 +73,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     return order
   }
 
-  const getOrdersByUser = async (userId: string): Promise<Order[]> {
+  const getOrdersByUser = async (userId: string) => {
     const { data: ordersData, error: ordersError } = await supabase
       .from("orders")
       .select("*")
@@ -89,37 +89,39 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       return []
     }
 
-    const ordersWithItems: Order[] = (await Promise.all(
-      ordersData.map(async (orderData) => {
-        const { data: itemsData, error: itemsError } = await supabase
-          .from("order_items")
-          .select("*")
-          .eq("order_id", orderData.id)
+    const ordersWithItems: Order[] = (
+      await Promise.all(
+        ordersData.map(async (orderData) => {
+          const { data: itemsData, error: itemsError } = await supabase
+            .from("order_items")
+            .select("*")
+            .eq("order_id", orderData.id)
 
-        if (itemsError) {
-          console.error("[v0] Error fetching order items:", itemsError)
-          return null
-        }
+          if (itemsError) {
+            console.error("[v0] Error fetching order items:", itemsError)
+            return null
+          }
 
-        const items: CartItem[] = itemsData.map((item) => ({
-          id: `${item.course_id}-${item.hours}`,
-          courseId: item.course_id,
-          title: item.title,
-          category: item.category,
-          hours: item.hours,
-          price: Number(item.price),
-        }))
+          const items: CartItem[] = itemsData.map((item) => ({
+            id: `${item.course_id}-${item.hours}`,
+            courseId: item.course_id,
+            title: item.title,
+            category: item.category,
+            hours: item.hours,
+            price: Number(item.price),
+          }))
 
-        return {
-          id: orderData.id,
-          userId: orderData.user_id,
-          items,
-          total: Number(orderData.total),
-          status: orderData.status as Order["status"],
-          createdAt: new Date(orderData.created_at),
-        }
-      }),
-    )).filter((order): order is Order => order !== null)
+          return {
+            id: orderData.id,
+            userId: orderData.user_id,
+            items,
+            total: Number(orderData.total),
+            status: orderData.status as Order["status"],
+            createdAt: new Date(orderData.created_at),
+          }
+        }),
+      )
+    ).filter((order): order is Order => order !== null)
 
     setOrders(ordersWithItems)
 
