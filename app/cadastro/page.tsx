@@ -180,7 +180,7 @@ export default function CadastroPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="cpf">CPF (opcional)</Label>
+                  <Label htmlFor="cpf">CPF *</Label>
                   <div className="relative">
                     <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -203,7 +203,7 @@ export default function CadastroPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Telefone (opcional)</Label>
+                  <Label htmlFor="phone">Telefone *</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
