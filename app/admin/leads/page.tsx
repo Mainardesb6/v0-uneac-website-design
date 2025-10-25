@@ -16,6 +16,7 @@ interface NewsletterSubscriber {
   id: string
   email: string
   subscribed_at: string
+  created_at: string
   status: string
   source: string
 }

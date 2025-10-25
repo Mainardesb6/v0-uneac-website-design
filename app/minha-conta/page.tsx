@@ -11,6 +11,7 @@ import { Footer } from "@/components/footer"
 import { useAuth } from "@/lib/auth-context"
 import { useOrders } from "@/lib/orders-context"
 import { User, Package, Calendar, ShoppingCart, MessageCircle, Loader2 } from "lucide-react"
+import { CartItem } from "@/lib/cart-context"
 
 export default function MyAccountPage() {
   const { user, isLoading: authLoading, logout } = useAuth()
@@ -200,7 +201,7 @@ export default function MyAccountPage() {
                           </div>
 
                           <div className="space-y-2 mb-4">
-                            {order.items.map((item) => (
+                            {order.items.map((item: CartItem) => (
                               <div key={item.id} className="flex items-center justify-between text-sm">
                                 <div className="flex-1">
                                   <span className="font-medium">{item.title}</span>

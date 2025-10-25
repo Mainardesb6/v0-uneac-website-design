@@ -28,7 +28,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([])
   const supabase = createClient()
 
-  const createOrder = async (userId: string, items: CartItem[], total: number): Promise<Order> => {
+  const createOrder = async (userId: string, items: CartItem[], total: number): Promise<Order> {
     const orderId = Math.random().toString(36).substr(2, 6).toUpperCase()
 
     const { error: orderError } = await supabase.from("orders").insert({
@@ -73,7 +73,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     return order
   }
 
-  const getOrdersByUser = async (userId: string): Promise<Order[]> => {
+  const getOrdersByUser = async (userId: string): Promise<Order[]> {
     const { data: ordersData, error: ordersError } = await supabase
       .from("orders")
       .select("*")
@@ -89,7 +89,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       return []
     }
 
-    const ordersWithItems: Order[] = await Promise.all(
+    const ordersWithItems: Order[] = (await Promise.all(
       ordersData.map(async (orderData) => {
         const { data: itemsData, error: itemsError } = await supabase
           .from("order_items")
@@ -119,13 +119,11 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
           createdAt: new Date(orderData.created_at),
         }
       }),
-    )
+    )).filter((order): order is Order => order !== null)
 
-    const validOrders = ordersWithItems.filter((order): order is Order => order !== null)
+    setOrders(ordersWithItems)
 
-    setOrders(validOrders)
-
-    return validOrders
+    return ordersWithItems
   }
 
   const updateOrderStatus = async (orderId: string, status: Order["status"]) => {
