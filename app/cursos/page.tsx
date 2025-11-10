@@ -12,7 +12,7 @@ export default function CursosPage() {
           <div className="container mx-auto px-4">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-4">Todos os Cursos</h1>
             <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto">
-              Explore nossa ampla gama de cursos de pós-graduação nas áreas de Educação, Saúde e Letras
+              Explore nossa ampla gama de cursos de extensão nas áreas de Educação, Saúde e Letras
             </p>
           </div>
         </div>
