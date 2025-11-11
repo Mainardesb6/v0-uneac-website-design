@@ -11,14 +11,30 @@ import { RefreshCw, Download, BarChart3 } from "lucide-react"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import Link from "next/link"
+import { getOrdersWithProfiles } from "../actions"
+
+interface OrderItem {
+  id: number
+  course_id: number
+  title: string
+  category: string
+  hours: number
+  price: number
+}
 
 interface Order {
   id: string
-  status: string
+  user_id: string
   total: number
+  status: string
   created_at: string
+  updated_at: string
+  items: OrderItem[]
   customer: {
     name: string
+    email: string
+    phone: string
+    cpf: string
   }
 }
 
@@ -41,7 +57,6 @@ export default function AdminRelatóriosPage() {
       if (!user) return
 
       const supabase = createClient()
-
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
 
       if (profile?.role !== "admin") {
@@ -61,39 +76,10 @@ export default function AdminRelatóriosPage() {
   async function loadOrders() {
     setIsLoading(true)
     try {
-      const supabase = createClient()
-
-      const { data: ordersData, error } = await supabase
-        .from("orders")
-        .select(
-          `
-          id,
-          status,
-          total,
-          created_at,
-          profiles:user_id(name)
-        `,
-        )
-        .order("created_at", { ascending: false })
-
-      if (error) {
-        console.error("[v0] Erro ao carregar pedidos:", error)
-        return
-      }
-
-      const formattedOrders = (ordersData || []).map((order: any) => ({
-        id: order.id,
-        status: order.status,
-        total: order.total,
-        created_at: order.created_at,
-        customer: {
-          name: order.profiles?.name || "N/A",
-        },
-      }))
-
-      setOrders(formattedOrders)
+      const ordersWithDetails = await getOrdersWithProfiles()
+      setOrders(ordersWithDetails)
     } catch (error) {
-      console.error("[v0] Erro:", error)
+      console.error("[v0] Erro ao carregar pedidos:", error)
     } finally {
       setIsLoading(false)
     }
