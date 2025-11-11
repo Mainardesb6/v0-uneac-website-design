@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { RefreshCw, Download, BarChart3 } from "lucide-react"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import Link from "next/link"
 
 interface Order {
   id: string
@@ -219,8 +220,27 @@ export default function AdminRelatóriosPage() {
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4">
+        {/* Navigation Tabs */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Relatórios de Pedidos</h1>
+          <h1 className="text-4xl font-bold mb-4">Painel Administrativo</h1>
+          <div className="flex gap-4 border-b">
+            <Link href="/admin/pedidos">
+              <Button variant="ghost" className="rounded-none">
+                Gerenciamento de Pedidos
+              </Button>
+            </Link>
+            <Link href="/admin/relatorios">
+              <Button variant="ghost" className="border-b-2 border-cyan-600 rounded-none">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Relatórios
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Relatórios Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-2">Relatórios de Pedidos</h2>
           <p className="text-muted-foreground">Visualize e exporte relatórios detalhados de pedidos</p>
         </div>
 

@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Eye, RefreshCw } from "lucide-react"
+import { Search, Eye, RefreshCw, FileText } from "lucide-react"
 import { getOrdersWithProfiles } from "../actions"
+import Link from "next/link"
 
 interface OrderItem {
   id: number
@@ -160,7 +161,24 @@ export default function AdminPedidosPage() {
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Gerenciamento de Pedidos</h1>
+          <h1 className="text-4xl font-bold mb-4">Painel Administrativo</h1>
+          <div className="flex gap-4 border-b">
+            <Link href="/admin/pedidos">
+              <Button variant="ghost" className="border-b-2 border-cyan-600 rounded-none">
+                Gerenciamento de Pedidos
+              </Button>
+            </Link>
+            <Link href="/admin/relatorios">
+              <Button variant="ghost" className="rounded-none">
+                <FileText className="h-4 w-4 mr-2" />
+                Relatórios
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-2">Gerenciamento de Pedidos</h2>
           <p className="text-muted-foreground">Acompanhe e gerencie todos os pedidos da UNEAC</p>
         </div>
 
