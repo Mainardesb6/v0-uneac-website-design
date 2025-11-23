@@ -83,6 +83,9 @@ export function Header() {
             <Link href="/cursos-mensais" className="text-sm font-medium hover:text-primary transition-colors">
               Cursos Mensais
             </Link>
+            <Link href="/lives" className="text-sm font-medium hover:text-primary transition-colors">
+              Lives
+            </Link>
             <Link href="/quem-somos" className="text-sm font-medium hover:text-primary transition-colors">
               Quem Somos
             </Link>
@@ -214,6 +217,13 @@ export function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Cursos Mensais
+              </Link>
+              <Link
+                href="/lives"
+                className="block text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Lives
               </Link>
               <Link
                 href="/quem-somos"
