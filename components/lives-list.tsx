@@ -21,7 +21,7 @@ const lives: Live[] = [
     date: "02/04/2026",
     views: "1,9 mil",
     thumbnail: "https://img.youtube.com/vi/lM7MJIFqVGs/maxresdefault.jpg",
-    youtubeUrl: "https://www.youtube.com/live/lM7MJIFqVGs",
+    youtubeUrl: "https://www.youtube.com/embed/lM7MJIFqVGs",
   },
   {
     id: "j9pWqjjDkgc",
@@ -29,7 +29,7 @@ const lives: Live[] = [
     date: "02/03/2026",
     views: "2,6 mil",
     thumbnail: "https://img.youtube.com/vi/j9pWqjjDkgc/maxresdefault.jpg",
-    youtubeUrl: "https://www.youtube.com/live/j9pWqjjDkgc",
+    youtubeUrl: "https://www.youtube.com/embed/j9pWqjjDkgc",
   },
   {
     id: "JhdmX3tfpjU",
@@ -38,7 +38,7 @@ const lives: Live[] = [
     date: "02/02/2026",
     views: "2,8 mil",
     thumbnail: "https://img.youtube.com/vi/JhdmX3tfpjU/maxresdefault.jpg",
-    youtubeUrl: "https://www.youtube.com/live/JhdmX3tfpjU",
+    youtubeUrl: "https://www.youtube.com/embed/JhdmX3tfpjU",
   },
   {
     id: "EV2OtdNv_VY",
@@ -46,7 +46,7 @@ const lives: Live[] = [
     date: "01/12/2025",
     views: "2,3 mil",
     thumbnail: "https://img.youtube.com/vi/EV2OtdNv_VY/maxresdefault.jpg",
-    youtubeUrl: "https://www.youtube.com/live/EV2OtdNv_VY",
+    youtubeUrl: "https://www.youtube.com/embed/EV2OtdNv_VY",
   },
   {
     id: "_NMXP6RCg4U",
@@ -55,7 +55,7 @@ const lives: Live[] = [
     date: "Há 2 semanas",
     views: "1,2 mil",
     thumbnail: "https://img.youtube.com/vi/_NMXP6RCg4U/maxresdefault.jpg",
-    youtubeUrl: "https://www.youtube.com/live/_NMXP6RCg4U",
+    youtubeUrl: "https://www.youtube.com/embed/_NMXP6RCg4U",
   },
   {
     id: "TAM4eGo2CPc",
@@ -63,7 +63,7 @@ const lives: Live[] = [
     date: "Há 1 mês",
     views: "2,6 mil",
     thumbnail: "https://img.youtube.com/vi/TAM4eGo2CPc/maxresdefault.jpg",
-    youtubeUrl: "https://www.youtube.com/live/TAM4eGo2CPc",
+    youtubeUrl: "https://www.youtube.com/embed/TAM4eGo2CPc",
   },
   {
     id: "mOYXHfEzu9k",
@@ -72,7 +72,7 @@ const lives: Live[] = [
     date: "Há 2 meses",
     views: "2,8 mil",
     thumbnail: "https://img.youtube.com/vi/mOYXHfEzu9k/maxresdefault.jpg",
-    youtubeUrl: "https://www.youtube.com/live/mOYXHfEzu9k",
+    youtubeUrl: "https://www.youtube.com/embed/mOYXHfEzu9k",
   },
 ]
 
@@ -132,7 +132,7 @@ export function LivesList() {
           <div className="bg-card rounded-lg overflow-hidden shadow-lg border">
             <div className="aspect-video">
               <iframe
-                src={`https://www.youtube.com/embed/${selectedLive.id}`}
+                src={selectedLive.youtubeUrl}
                 title={selectedLive.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
