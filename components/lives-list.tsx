@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Play, Clock, Users } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 type Live = {
   id: string
@@ -90,6 +91,16 @@ export function LivesList() {
 
   return (
     <section className="container mx-auto px-4 py-12">
+      <div className="text-center mb-8">
+        <Badge variant="outline" className="mb-4 text-base px-4 py-2">
+          Conteúdo Gratuito
+        </Badge>
+        <h2 className="text-3xl font-bold mb-4">Todas as Nossas Lives</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          Selecione e assista qualquer live disponível em nosso acervo
+        </p>
+      </div>
+
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-8 justify-center">
         <Button
@@ -145,7 +156,6 @@ export function LivesList() {
         </div>
       )}
 
-      {/* Lives Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredLives.map((live) => (
           <div
@@ -153,11 +163,12 @@ export function LivesList() {
             className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border group cursor-pointer"
             onClick={() => setSelectedLive(live)}
           >
-            <div className="relative aspect-video overflow-hidden">
+            <div className="relative aspect-video overflow-hidden bg-muted">
               <img
                 src={live.thumbnail || "/placeholder.svg"}
                 alt={live.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                 <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
