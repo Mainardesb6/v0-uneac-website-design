@@ -45,13 +45,14 @@ export async function updateSession(request: NextRequest) {
     "/update-password", // Added /update-password to allow password reset without authentication
     "/cursos",
     "/cursos-mensais",
+    "/cursos-presenciais", // Added cursos-presenciais to public routes
     "/contato",
     "/quem-somos",
     "/checkout",
     "/politica-privacidade",
     "/termos-uso",
     "/nossa-equipe",
-    "/lives", // Added /lives to public routes
+    "/lives",
   ]
   const publicRoutePrefixes = ["/curso/", "/categoria/"]
   const protectedRoutePrefixes = ["/admin/"]
