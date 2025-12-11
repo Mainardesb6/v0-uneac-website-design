@@ -80,6 +80,9 @@ export function Header() {
             <Link href="/cursos" className="text-sm font-medium hover:text-primary transition-colors">
               Cursos
             </Link>
+            <Link href="/cursos-presenciais" className="text-sm font-medium hover:text-primary transition-colors">
+              Cursos Presenciais
+            </Link>
             <Link href="/cursos-mensais" className="text-sm font-medium hover:text-primary transition-colors">
               Cursos Mensais
             </Link>
@@ -210,6 +213,13 @@ export function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Cursos
+              </Link>
+              <Link
+                href="/cursos-presenciais"
+                className="block text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Cursos Presenciais
               </Link>
               <Link
                 href="/cursos-mensais"
