@@ -138,18 +138,7 @@ export default function CursosPresenciaisPage() {
                   key={curso.id}
                   className="group relative bg-card rounded-2xl overflow-hidden shadow-lg border border-border"
                 >
-                  {/* Badge de destaque */}
-                  <div className="absolute top-4 left-4 z-20 flex gap-2">
-                    <Badge className="bg-[#00AEEF] text-white font-semibold px-3 py-1">
-                      <Star className="w-3 h-3 mr-1" />
-                      {curso.highlight}
-                    </Badge>
-                  </div>
-                  <div className="absolute top-4 right-4 z-20">
-                    <Badge variant="destructive" className="font-semibold px-3 py-1 animate-pulse">
-                      {curso.spots}
-                    </Badge>
-                  </div>
+                  
 
                   <div className={`grid lg:grid-cols-2 gap-0 ${index % 2 === 1 ? "lg:grid-flow-dense" : ""}`}>
                     {/* Video Section */}
