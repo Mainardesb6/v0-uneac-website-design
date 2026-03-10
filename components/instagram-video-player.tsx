@@ -14,13 +14,24 @@ export function InstagramVideoPlayer({ videoUrl }: InstagramVideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Check if script already exists
+    const existingScript = document.querySelector('script[src="https://www.instagram.com/embed.js"]')
+    
+    if (existingScript) {
+      // Script already loaded, just process embeds
+      if (window.instgrm) {
+        window.instgrm.Embeds.process()
+        setIsLoading(false)
+      }
+      return
+    }
+
     // Load Instagram embed script
     const script = document.createElement("script")
     script.src = "https://www.instagram.com/embed.js"
     script.async = true
-    document.body.appendChild(script)
-
-    // Process embeds after script loads
+    script.crossOrigin = "anonymous"
+    
     script.onload = () => {
       if (window.instgrm) {
         window.instgrm.Embeds.process()
@@ -28,9 +39,14 @@ export function InstagramVideoPlayer({ videoUrl }: InstagramVideoPlayerProps) {
       }
     }
 
-    return () => {
-      document.body.removeChild(script)
+    script.onerror = () => {
+      console.warn("[v0] Failed to load Instagram embed script")
+      setIsLoading(false)
     }
+
+    document.body.appendChild(script)
+
+    // Don't remove script on cleanup as it may be used by other components
   }, [])
 
   const handleFullscreen = () => {
