@@ -3,10 +3,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Clock } from "lucide-react"
-import { courses } from "@/lib/courses-data"
+import { courses, type Course } from "@/lib/courses-data"
 
 interface CourseGridProps {
   category?: string
+}
+
+// Check if a course has custom hour options (special pricing)
+function hasCustomHourOptions(course: Course): boolean {
+  return !!(course.hourOptions && course.hourOptions.length === 1)
 }
 
 export function CourseGrid({ category }: CourseGridProps) {
@@ -33,11 +38,11 @@ export function CourseGrid({ category }: CourseGridProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.map((course) => (
             <Card key={course.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="aspect-video overflow-hidden rounded-t-lg">
+              <div className={`overflow-hidden rounded-t-lg ${hasCustomHourOptions(course) ? 'aspect-square bg-muted/20' : 'aspect-video'}`}>
                 <img
                   src={course.image || "/placeholder.svg"}
                   alt={course.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className={`w-full h-full group-hover:scale-105 transition-transform duration-300 ${hasCustomHourOptions(course) ? 'object-contain' : 'object-cover'}`}
                 />
               </div>
 
