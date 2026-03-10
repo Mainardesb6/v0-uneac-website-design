@@ -184,8 +184,8 @@ export function CourseDetail({ course }: CourseDetailProps) {
         {/* Right Column - Course Content */}
         <div className="lg:col-span-2 space-y-8">
           {/* Course Image */}
-          <div className="aspect-video overflow-hidden rounded-lg">
-            <img src={course.image || "/placeholder.svg"} alt={course.title} className="w-full h-full object-cover" />
+          <div className="overflow-hidden rounded-lg bg-muted/20">
+            <img src={course.image || "/placeholder.svg"} alt={course.title} className="w-full h-auto object-contain" />
           </div>
 
           {/* About the Course */}
