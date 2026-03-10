@@ -681,6 +681,52 @@ A partir das perspectivas de ampliação do estudo de povos africanos pelo curr�
     ],
   },
   {
+    id: 100,
+    title: "Teste ABC: Avaliação e Rastreio dos Preditores da Alfabetização",
+    category: "Educação",
+    duration: "80 horas",
+    modality: "Online",
+    price: "R$ 99,00",
+    totalPrice: "R$ 99,00",
+    image: "/images/courses/teste-abc-alfabetizacao.jpg",
+    description: `O curso Teste ABC capacita profissionais da educação e saúde para aplicar, corrigir e interpretar o Teste ABC, um instrumento não restrito e padronizado para avaliação e rastreio dos preditores da alfabetização.
+
+Aberto para todos os profissionais da educação e saúde, este curso gravado oferece uma formação completa sobre a história e fundamentação teórica do teste, sua estrutura e componentes, aplicação passo a passo, correção e interpretação dos resultados, além do uso prático para intervenções pedagógicas.
+
+Benefícios do curso:
+- Progressão de carreira
+- Adicional de qualificação
+- Licença capacitação
+- Valorização do currículo
+- Horas complementares`,
+    instructor: "Profa. Juliana Moraes Almeida",
+    targetAudience: [
+      "Professores",
+      "Pedagogos",
+      "Psicopedagogos",
+      "Psicólogos",
+      "Fonoaudiólogos",
+      "Profissionais da educação",
+      "Profissionais da saúde"
+    ],
+    curriculum: [
+      {
+        module: "Estrutura Curricular",
+        topics: [
+          "História e fundamentação teórica do Teste ABC",
+          "Estrutura e componentes do teste",
+          "Aplicação passo a passo",
+          "Correção e interpretação dos resultados",
+          "Uso prático para intervenções pedagógicas",
+          "Estudos de caso"
+        ],
+      },
+    ],
+    hourOptions: [
+      { hours: 80, price: 99 },
+    ],
+  },
+  {
     id: 23,
     title: "O ENSINO DE FILOSOFIA COMO CRIAÇÃO DE CONCEITOS EM DELEUZE E A EXPERIÊNCIA FILOSÓFICA",
     category: "Educação",

@@ -9,6 +9,12 @@ import { Clock, Monitor, CheckCircle, ShoppingCart, Award, TrendingUp, BookOpen,
 import { useCart } from "@/lib/cart-context"
 import { useToast } from "@/hooks/use-toast"
 
+interface HourOption {
+  hours: number
+  price: number
+  installments?: string
+}
+
 interface Course {
   id: number
   title: string
@@ -25,19 +31,22 @@ interface Course {
     topics: string[]
   }[]
   instructor?: string
+  hourOptions?: HourOption[]
 }
 
 interface CourseDetailProps {
   course: Course
 }
 
-const hourOptions = [
+const defaultHourOptions: HourOption[] = [
   { hours: 40, price: 95 },
   { hours: 80, price: 155 },
   { hours: 100, price: 185 },
 ]
 
 export function CourseDetail({ course }: CourseDetailProps) {
+  // Use course-specific hour options if available, otherwise use defaults
+  const hourOptions = course.hourOptions && course.hourOptions.length > 0 ? course.hourOptions : defaultHourOptions
   const [selectedHours, setSelectedHours] = useState(hourOptions[0])
   const { dispatch } = useCart()
   const { toast } = useToast()
@@ -74,34 +83,37 @@ export function CourseDetail({ course }: CourseDetailProps) {
                 <CardTitle className="text-xl font-bold text-balance">{course.title}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-sm">Escolha a Carga Horária do seu Certificado</h3>
-                  <div className="space-y-2">
-                    {hourOptions.map((option) => (
-                      <label
-                        key={option.hours}
-                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
-                          selectedHours.hours === option.hours
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="radio"
-                            name="hours"
-                            value={option.hours}
-                            checked={selectedHours.hours === option.hours}
-                            onChange={() => setSelectedHours(option)}
-                            className="text-primary focus:ring-primary"
-                          />
-                          <span className="text-sm font-medium">{option.hours} horas</span>
-                        </div>
-                        <span className="text-sm font-semibold text-primary">R$ {option.price.toFixed(2)}</span>
-                      </label>
-                    ))}
+                {/* Only show hour selection if there are multiple options */}
+                {hourOptions.length > 1 ? (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-sm">Escolha a Carga Horária do seu Certificado</h3>
+                    <div className="space-y-2">
+                      {hourOptions.map((option) => (
+                        <label
+                          key={option.hours}
+                          className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
+                            selectedHours.hours === option.hours
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <input
+                              type="radio"
+                              name="hours"
+                              value={option.hours}
+                              checked={selectedHours.hours === option.hours}
+                              onChange={() => setSelectedHours(option)}
+                              className="text-primary focus:ring-primary"
+                            />
+                            <span className="text-sm font-medium">{option.hours} horas</span>
+                          </div>
+                          <span className="text-sm font-semibold text-primary">R$ {option.price.toFixed(2)}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                ) : null}
 
                 <div className="text-center space-y-2 pt-4 border-t">
                   <div className="text-2xl font-bold text-primary">R$ {selectedHours.price.toFixed(2)}</div>
@@ -172,8 +184,8 @@ export function CourseDetail({ course }: CourseDetailProps) {
         {/* Right Column - Course Content */}
         <div className="lg:col-span-2 space-y-8">
           {/* Course Image */}
-          <div className="aspect-video overflow-hidden rounded-lg">
-            <img src={course.image || "/placeholder.svg"} alt={course.title} className="w-full h-full object-cover" />
+          <div className="overflow-hidden rounded-lg bg-muted/20">
+            <img src={course.image || "/placeholder.svg"} alt={course.title} className="w-full h-auto object-contain" />
           </div>
 
           {/* About the Course */}
