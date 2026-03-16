@@ -25,7 +25,7 @@ export function EbookCard({ ebook }: EbookCardProps) {
       )}
       onClick={() => toggleEbook(ebook)}
     >
-      <div className="relative aspect-square overflow-hidden bg-muted">
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <Image
           src={ebook.image}
           alt={ebook.title}
@@ -52,19 +52,18 @@ export function EbookCard({ ebook }: EbookCardProps) {
           {ebook.pages} cartões
         </Badge>
       </div>
-      <CardContent className="p-4">
-        <p className="text-xs text-muted-foreground mb-1">{ebook.author}</p>
-        <h3 className="font-semibold text-sm leading-snug mb-3 min-h-[4.5rem]">
+      <CardContent className="p-5">
+        <p className="text-sm text-muted-foreground mb-2">{ebook.author}</p>
+        <h3 className="font-semibold text-base leading-snug mb-4 min-h-[5rem]">
           {ebook.title}
         </h3>
         <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-primary">
+          <span className="text-xl font-bold text-primary">
             R$ {ebook.price.toFixed(2).replace(".", ",")}
           </span>
           <Button
-            size="sm"
+            size="default"
             variant={selected ? "default" : "outline"}
-            className="text-xs"
             onClick={(e) => {
               e.stopPropagation()
               toggleEbook(ebook)
