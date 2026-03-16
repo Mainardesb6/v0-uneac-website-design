@@ -46,6 +46,7 @@ export async function updateSession(request: NextRequest) {
     "/cursos",
     "/cursos-mensais",
     "/cursos-presenciais", // Added cursos-presenciais to public routes
+    "/ebooks", // Added ebooks to public routes
     "/contato",
     "/quem-somos",
     "/checkout",
