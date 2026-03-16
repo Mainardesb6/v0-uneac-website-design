@@ -25,12 +25,13 @@ export function EbookCard({ ebook }: EbookCardProps) {
       )}
       onClick={() => toggleEbook(ebook)}
     >
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+      <div className="relative aspect-[4/5] overflow-hidden bg-muted">
         <Image
           src={ebook.image}
           alt={ebook.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, 50vw"
         />
         <div 
           className={cn(
@@ -40,29 +41,29 @@ export function EbookCard({ ebook }: EbookCardProps) {
         />
         <div 
           className={cn(
-            "absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300",
+            "absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300",
             selected 
               ? "bg-primary text-primary-foreground" 
               : "bg-background/90 text-foreground group-hover:bg-primary group-hover:text-primary-foreground"
           )}
         >
-          {selected ? <Check className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+          {selected ? <Check className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
         </div>
-        <Badge className="absolute bottom-3 left-3 bg-primary text-primary-foreground">
+        <Badge className="absolute bottom-4 left-4 bg-primary text-primary-foreground text-sm px-3 py-1">
           {ebook.pages} cartões
         </Badge>
       </div>
-      <CardContent className="p-5">
+      <CardContent className="p-6">
         <p className="text-sm text-muted-foreground mb-2">{ebook.author}</p>
-        <h3 className="font-semibold text-base leading-snug mb-4 min-h-[5rem]">
+        <h3 className="font-semibold text-lg leading-snug mb-4">
           {ebook.title}
         </h3>
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-primary">
+          <span className="text-2xl font-bold text-primary">
             R$ {ebook.price.toFixed(2).replace(".", ",")}
           </span>
           <Button
-            size="default"
+            size="lg"
             variant={selected ? "default" : "outline"}
             onClick={(e) => {
               e.stopPropagation()

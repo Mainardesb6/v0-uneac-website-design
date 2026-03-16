@@ -41,44 +41,30 @@ export default function EbooksPage() {
       <div className="min-h-screen bg-background">
         <Header />
         
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-primary/5 to-background pt-24 pb-16">
+        {/* Hero Section - Compact */}
+        <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-primary/5 to-background pt-24 pb-8">
           <div className="absolute inset-0 bg-grid-pattern opacity-5" />
           <div className="container mx-auto px-4 relative">
-            <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                Novidade UNEAC
-              </span>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-balance">
+            <div className="text-center max-w-3xl mx-auto mb-6">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-balance">
                 eBooks Especializados em{" "}
                 <span className="text-primary">Autismo e Educação</span>
               </h1>
-              <p className="text-lg text-muted-foreground text-pretty">
-                Material ilustrado, comentado e totalmente atualizado, pensado para facilitar 
-                a compreensão e tornar o aprendizado mais dinâmico e prático.
+              <p className="text-base text-muted-foreground text-pretty">
+                Material ilustrado e atualizado pela Profª Juliana Moraes. 
+                <span className="font-semibold text-foreground"> Combos: 1 por R$19,99 | 3 por R$49,99 | 7 por R$89,99</span>
               </p>
             </div>
 
-            {/* Pricing Cards */}
-            <div className="max-w-4xl mx-auto mb-12">
-              <h2 className="text-center text-lg font-semibold text-muted-foreground mb-6">
-                Escolha seu combo e economize
-              </h2>
-              <EbookPricingCards />
-            </div>
-
-            {/* Features */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            {/* Features - Inline */}
+            <div className="flex flex-wrap justify-center gap-4 max-w-3xl mx-auto">
               {features.map((feature) => (
                 <div
                   key={feature.title}
-                  className="flex flex-col items-center text-center p-4 rounded-xl bg-background/50 backdrop-blur-sm border"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/50 backdrop-blur-sm border text-sm"
                 >
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                    <feature.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-medium text-sm mb-1">{feature.title}</h3>
-                  <p className="text-xs text-muted-foreground">{feature.description}</p>
+                  <feature.icon className="h-4 w-4 text-primary" />
+                  <span className="font-medium">{feature.title}</span>
                 </div>
               ))}
             </div>
