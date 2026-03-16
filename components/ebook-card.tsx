@@ -54,7 +54,7 @@ export function EbookCard({ ebook }: EbookCardProps) {
       </div>
       <CardContent className="p-4">
         <p className="text-xs text-muted-foreground mb-1">{ebook.author}</p>
-        <h3 className="font-semibold text-sm leading-tight line-clamp-3 mb-2 min-h-[3.75rem]">
+        <h3 className="font-semibold text-sm leading-snug mb-3 min-h-[4.5rem]">
           {ebook.title}
         </h3>
         <div className="flex items-center justify-between">
