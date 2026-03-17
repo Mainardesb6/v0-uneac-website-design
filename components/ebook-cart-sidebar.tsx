@@ -2,13 +2,14 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { X, ShoppingBag, Trash2, Tag, ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { useEbookCart } from "@/lib/ebook-cart-context"
+import { useCart } from "@/lib/cart-context"
 import { ebookPricingTiers } from "@/lib/ebooks-data"
 import { cn } from "@/lib/utils"
 
@@ -24,8 +25,41 @@ export function EbookCartSidebar() {
     nextTier,
     ebooksToNextTier
   } = useEbookCart()
+  const { dispatch: cartDispatch } = useCart()
+  const router = useRouter()
 
   const [isExpanded, setIsExpanded] = useState(true)
+  
+  const handleCheckout = () => {
+    if (quantity === 0) return
+    
+    // Clear the main cart first
+    cartDispatch({ type: "CLEAR_CART" })
+    
+    // Calculate price per ebook based on total (which already accounts for tier pricing)
+    const pricePerEbook = total / quantity
+    
+    // Add each selected ebook to the main cart with the calculated price
+    selectedEbooks.forEach((ebook) => {
+      cartDispatch({
+        type: "ADD_ITEM",
+        payload: {
+          id: `ebook-${ebook.id}`,
+          courseId: ebook.id,
+          title: ebook.title,
+          hours: 0, // eBooks don't have hours
+          price: pricePerEbook,
+          category: "eBook"
+        }
+      })
+    })
+    
+    // Clear the ebook cart
+    clearCart()
+    
+    // Navigate to checkout
+    router.push("/checkout")
+  }
 
   // Calculate progress to next tier
   const progressToNextTier = nextTier 
@@ -157,11 +191,9 @@ export function EbookCartSidebar() {
             </div>
 
             {/* Checkout Button */}
-            <Button asChild className="w-full" size="lg">
-              <Link href={`/checkout?type=ebooks&ids=${selectedEbooks.map(e => e.id).join(",")}`}>
-                Finalizar Compra
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+            <Button className="w-full" size="lg" onClick={handleCheckout}>
+              Finalizar Compra
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </>
         ) : (

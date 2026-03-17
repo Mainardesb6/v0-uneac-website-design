@@ -4,7 +4,6 @@ import Image from "next/image"
 import { Check, Plus } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useEbookCart } from "@/lib/ebook-cart-context"
 import type { Ebook } from "@/lib/ebooks-data"
@@ -49,9 +48,6 @@ export function EbookCard({ ebook }: EbookCardProps) {
         >
           {selected ? <Check className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
         </div>
-        <Badge className="absolute bottom-4 left-4 bg-primary text-primary-foreground text-sm px-3 py-1">
-          {ebook.pages} cartões
-        </Badge>
       </div>
       <CardContent className="p-6">
         <p className="text-sm text-muted-foreground mb-2">{ebook.author}</p>
