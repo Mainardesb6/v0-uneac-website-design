@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, FormEvent } from "react"
+import { useEffect, useState, useRef, FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,121 +21,106 @@ export default function CheckoutPage() {
   const [activeTab, setActiveTab] = useState("login")
   const [isProcessing, setIsProcessing] = useState(false)
   const [orderCreated, setOrderCreated] = useState(false)
+  const orderCreationAttempted = useRef(false)
   const { user, login, register, isLoading } = useAuth()
   const { state: cartState, dispatch: cartDispatch } = useCart()
   const { createOrder } = useOrders()
   const { toast } = useToast()
   const router = useRouter()
 
-  const handleLogin = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
 
-      const success = await login(loginData.email, loginData.password)
+    const success = await login(loginData.email, loginData.password)
 
-      if (success) {
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Processando seu pedido...",
-        })
-      } else {
-        toast({
-          title: "Erro ao fazer login",
-          description: "Email ou senha incorretos. Tente novamente.",
-          variant: "destructive",
-        })
-      }
-    },
-    [loginData.email, loginData.password, login, toast],
-  )
+    if (success) {
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Processando seu pedido...",
+      })
+    } else {
+      toast({
+        title: "Erro ao fazer login",
+        description: "Email ou senha incorretos. Tente novamente.",
+        variant: "destructive",
+      })
+    }
+  }
 
-  const handleRegister = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
+  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
 
-      const success = await register(
-        registerData.name,
-        registerData.email,
-        registerData.password,
-        registerData.cpf,
-        registerData.phone,
-      )
-
-      if (success) {
-        toast({
-          title: "Conta criada com sucesso!",
-          description: "Processando seu pedido...",
-        })
-      } else {
-        toast({
-          title: "Erro ao criar conta",
-          description: "Não foi possível criar sua conta. Tente novamente.",
-          variant: "destructive",
-        })
-      }
-    },
-    [
+    const success = await register(
       registerData.name,
       registerData.email,
       registerData.password,
       registerData.cpf,
       registerData.phone,
-      register,
-      toast,
-    ],
-  )
+    )
 
-  useEffect(() => {
-    if (cartState.itemCount === 0) {
-      router.push("/cursos")
-    }
-  }, [cartState.itemCount, router])
-
-  const handleCreateOrder = useCallback(async () => {
-    if (!user || cartState.itemCount === 0 || isProcessing || orderCreated) return
-
-    setIsProcessing(true)
-
-    try {
-      const order = await createOrder(user.id, cartState.items, cartState.total)
-
-      setOrderCreated(true)
-      cartDispatch({ type: "CLEAR_CART" })
-
+    if (success) {
       toast({
-        title: "Pedido criado com sucesso!",
-        description: `Pedido #${order.id} registrado. Redirecionando para seus pedidos...`,
+        title: "Conta criada com sucesso!",
+        description: "Processando seu pedido...",
       })
-
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      router.push("/minha-conta")
-    } catch (error) {
-      console.error("[v0] Error creating order:", error)
+    } else {
       toast({
-        title: "Erro ao criar pedido",
-        description: "Ocorreu um erro ao processar seu pedido. Tente novamente.",
+        title: "Erro ao criar conta",
+        description: "Não foi possível criar sua conta. Tente novamente.",
         variant: "destructive",
       })
-      setIsProcessing(false)
     }
-  }, [
-    user,
-    cartState.items,
-    cartState.itemCount,
-    cartState.total,
-    isProcessing,
-    orderCreated,
-    createOrder,
-    cartDispatch,
-    toast,
-    router,
-  ])
+  }
 
+  // Redirect if cart is empty (but not if order was just created)
   useEffect(() => {
-    if (user && cartState.itemCount > 0 && !isProcessing && !orderCreated) {
-      handleCreateOrder()
+    if (cartState.itemCount === 0 && !orderCreated && !isProcessing) {
+      router.push("/cursos")
     }
-  }, [user, cartState.itemCount, isProcessing, orderCreated, handleCreateOrder])
+  }, [cartState.itemCount, orderCreated, isProcessing, router])
+
+  // Create order when user is logged in - only runs once
+  useEffect(() => {
+    const createOrderOnce = async () => {
+      // Guard: prevent multiple executions
+      if (!user || cartState.itemCount === 0 || orderCreationAttempted.current) {
+        return
+      }
+
+      // Mark as attempted immediately to prevent re-runs
+      orderCreationAttempted.current = true
+      setIsProcessing(true)
+
+      try {
+        const order = await createOrder(user.id, cartState.items, cartState.total)
+
+        setOrderCreated(true)
+        cartDispatch({ type: "CLEAR_CART" })
+
+        toast({
+          title: "Pedido criado com sucesso!",
+          description: `Pedido #${order.id} registrado. Redirecionando para seus pedidos...`,
+        })
+
+        setTimeout(() => {
+          router.push("/minha-conta")
+        }, 1000)
+      } catch (error) {
+        console.error("Error creating order:", error)
+        toast({
+          title: "Erro ao criar pedido",
+          description: "Ocorreu um erro ao processar seu pedido. Tente novamente.",
+          variant: "destructive",
+        })
+        // Reset the flag so user can try again
+        orderCreationAttempted.current = false
+        setIsProcessing(false)
+      }
+    }
+
+    createOrderOnce()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
 
   if (cartState.itemCount === 0) {
     return null
