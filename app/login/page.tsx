@@ -32,9 +32,9 @@ export default function LoginPage() {
     }
 
     try {
-      const success = await login(email, password)
+      const loggedInUser = await login(email, password)
 
-      if (success) {
+      if (loggedInUser) {
         toast({
           title: "Login realizado com sucesso!",
           description: "Bem-vindo de volta!",

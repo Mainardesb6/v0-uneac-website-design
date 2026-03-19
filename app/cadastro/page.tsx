@@ -53,7 +53,7 @@ export default function CadastroPage() {
     }
 
     try {
-      const success = await register(
+      const registeredUser = await register(
         formData.name,
         formData.email,
         formData.password,
@@ -61,7 +61,7 @@ export default function CadastroPage() {
         formData.phone || "",
       )
 
-      if (success) {
+      if (registeredUser) {
         toast({
           title: "Cadastro realizado com sucesso!",
           description: "Verifique sua caixa de entrada para confirmar sua conta e poder fazer o login.",
