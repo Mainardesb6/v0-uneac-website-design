@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, FormEvent } from "react"
+import { useState, useRef, FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,22 +20,32 @@ export default function CheckoutPage() {
   const [registerData, setRegisterData] = useState({ name: "", email: "", password: "", cpf: "", phone: "" })
   const [activeTab, setActiveTab] = useState("login")
   const [isProcessing, setIsProcessing] = useState(false)
+  const orderBeingCreated = useRef(false)
   const { user, login, register, isLoading } = useAuth()
   const { state: cartState, dispatch: cartDispatch } = useCart()
   const { createOrder } = useOrders()
   const { toast } = useToast()
   const router = useRouter()
 
-  // Process order after login/register
+  // Process order after login/register - with ref guard to prevent double calls
   const processOrder = async (userId: string) => {
-    if (isProcessing || cartState.itemCount === 0) return
+    // Guard against multiple simultaneous calls
+    if (orderBeingCreated.current || isProcessing || cartState.itemCount === 0) {
+      return
+    }
     
+    orderBeingCreated.current = true
     setIsProcessing(true)
 
     try {
-      const order = await createOrder(userId, cartState.items, cartState.total)
+      // Copy items before clearing cart
+      const itemsToOrder = [...cartState.items]
+      const totalToCharge = cartState.total
       
+      // Clear cart immediately to prevent double orders
       cartDispatch({ type: "CLEAR_CART" })
+      
+      const order = await createOrder(userId, itemsToOrder, totalToCharge)
 
       toast({
         title: "Pedido criado com sucesso!",
@@ -50,6 +60,7 @@ export default function CheckoutPage() {
         description: "Ocorreu um erro ao processar seu pedido. Tente novamente.",
         variant: "destructive",
       })
+      orderBeingCreated.current = false
       setIsProcessing(false)
     }
   }
@@ -106,10 +117,29 @@ export default function CheckoutPage() {
     }
   }
 
-  // If cart is empty and not processing, redirect
+  // If cart is empty and not processing, show empty state with redirect option
   if (cartState.itemCount === 0 && !isProcessing) {
-    router.push("/cursos")
-    return null
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <ShoppingCart className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Seu carrinho está vazio</h2>
+            <p className="text-muted-foreground mb-4">Adicione cursos ou eBooks para continuar</p>
+            <div className="flex gap-4 justify-center">
+              <Button onClick={() => router.push("/cursos")} variant="outline">
+                Ver Cursos
+              </Button>
+              <Button onClick={() => router.push("/ebooks")}>
+                Ver eBooks
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   // Show processing state

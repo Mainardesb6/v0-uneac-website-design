@@ -33,13 +33,11 @@ export function EbookCartSidebar() {
   const handleCheckout = () => {
     if (quantity === 0) return
     
-    // Clear the main cart first
-    cartDispatch({ type: "CLEAR_CART" })
-    
     // Calculate price per ebook based on total (which already accounts for tier pricing)
     const pricePerEbook = total / quantity
     
     // Add each selected ebook to the main cart with the calculated price
+    // Don't clear the main cart - allow mixing ebooks with courses
     selectedEbooks.forEach((ebook) => {
       cartDispatch({
         type: "ADD_ITEM",
@@ -54,7 +52,7 @@ export function EbookCartSidebar() {
       })
     })
     
-    // Clear the ebook cart
+    // Clear the ebook cart after adding to main cart
     clearCart()
     
     // Navigate to checkout
