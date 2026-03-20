@@ -21,8 +21,8 @@ interface AuthState {
 interface AuthContextType {
   user: User | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<boolean>
-  register: (name: string, email: string, password: string, cpf: string, phone: string) => Promise<boolean>
+  login: (email: string, password: string) => Promise<User | null>
+  register: (name: string, email: string, password: string, cpf: string, phone: string) => Promise<User | null>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<boolean>
   checkEmailExists: (email: string) => Promise<boolean>
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<User | null> => {
     setState((prev) => ({ ...prev, isLoading: true }))
 
     const supabase = createClient()
@@ -112,12 +112,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("EMAIL_NOT_CONFIRMED")
       }
 
-      return false
+      return null
     }
 
     if (!data.user) {
       setState((prev) => ({ ...prev, isLoading: false }))
-      return false
+      return null
     }
 
     const { data: profile, error: profileError } = await supabase
@@ -128,12 +128,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (profileError) {
       setState({ user: null, isLoading: false })
-      return false
+      return null
     }
 
     if (!profile) {
       setState({ user: null, isLoading: false })
-      return false
+      return null
     }
 
     const user: User = {
@@ -145,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setState({ user, isLoading: false })
-    return true
+    return user
   }
 
   const register = async (
@@ -154,14 +154,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     cpf: string,
     phone: string,
-  ): Promise<boolean> => {
+  ): Promise<User | null> => {
     setState((prev) => ({ ...prev, isLoading: true }))
 
     const supabase = createClient()
 
     if (cpf && cpf.replace(/\D/g, "").length === 11) {
-      const formattedCpf = cpf.replace(/\D/g, "")
-
       const { data: existingCpf, error: cpfCheckError } = await supabase
         .from("profiles")
         .select("cpf")
@@ -169,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle()
 
       if (cpfCheckError) {
-        console.log("[v0] Error checking CPF:", cpfCheckError.message)
+        console.log("Error checking CPF:", cpfCheckError.message)
       }
 
       if (existingCpf) {
@@ -201,11 +199,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!data.user) {
       setState((prev) => ({ ...prev, isLoading: false }))
-      return false
+      return null
     }
 
-    setState((prev) => ({ ...prev, isLoading: false }))
-    return true
+    // Create user object to return
+    const user: User = {
+      id: data.user.id,
+      name: name,
+      email: email,
+      cpf: cpf,
+      phone: phone,
+    }
+
+    setState({ user, isLoading: false })
+    return user
   }
 
   const logout = async () => {
@@ -221,14 +228,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = async (email: string): Promise<boolean> => {
     const supabase = createClient()
 
+    const redirectUrl = `${window.location.origin}/auth/callback?type=recovery`
+    console.log("[v0] Reset password redirect URL:", redirectUrl)
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
+      redirectTo: redirectUrl,
     })
 
     if (error) {
+      console.log("[v0] Reset password error:", error.message, error.status)
       return false
     }
 
+    console.log("[v0] Reset password email sent successfully")
     return true
   }
 

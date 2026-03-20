@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, FormEvent } from "react"
+import { useState, useRef, FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,128 +20,130 @@ export default function CheckoutPage() {
   const [registerData, setRegisterData] = useState({ name: "", email: "", password: "", cpf: "", phone: "" })
   const [activeTab, setActiveTab] = useState("login")
   const [isProcessing, setIsProcessing] = useState(false)
-  const [orderCreated, setOrderCreated] = useState(false)
+  const orderBeingCreated = useRef(false)
   const { user, login, register, isLoading } = useAuth()
   const { state: cartState, dispatch: cartDispatch } = useCart()
   const { createOrder } = useOrders()
   const { toast } = useToast()
   const router = useRouter()
 
-  const handleLogin = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
-
-      const success = await login(loginData.email, loginData.password)
-
-      if (success) {
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Processando seu pedido...",
-        })
-      } else {
-        toast({
-          title: "Erro ao fazer login",
-          description: "Email ou senha incorretos. Tente novamente.",
-          variant: "destructive",
-        })
-      }
-    },
-    [loginData.email, loginData.password, login, toast],
-  )
-
-  const handleRegister = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
-
-      const success = await register(
-        registerData.name,
-        registerData.email,
-        registerData.password,
-        registerData.cpf,
-        registerData.phone,
-      )
-
-      if (success) {
-        toast({
-          title: "Conta criada com sucesso!",
-          description: "Processando seu pedido...",
-        })
-      } else {
-        toast({
-          title: "Erro ao criar conta",
-          description: "Não foi possível criar sua conta. Tente novamente.",
-          variant: "destructive",
-        })
-      }
-    },
-    [
-      registerData.name,
-      registerData.email,
-      registerData.password,
-      registerData.cpf,
-      registerData.phone,
-      register,
-      toast,
-    ],
-  )
-
-  useEffect(() => {
-    if (cartState.itemCount === 0) {
-      router.push("/cursos")
+  // Process order after login/register - with ref guard to prevent double calls
+  const processOrder = async (userId: string) => {
+    // Guard against multiple simultaneous calls
+    if (orderBeingCreated.current || isProcessing || cartState.itemCount === 0) {
+      return
     }
-  }, [cartState.itemCount, router])
-
-  const handleCreateOrder = useCallback(async () => {
-    if (!user || cartState.itemCount === 0 || isProcessing || orderCreated) return
-
+    
+    orderBeingCreated.current = true
     setIsProcessing(true)
 
     try {
-      const order = await createOrder(user.id, cartState.items, cartState.total)
-
-      setOrderCreated(true)
+      // Copy items before clearing cart
+      const itemsToOrder = [...cartState.items]
+      const totalToCharge = cartState.total
+      
+      // Clear cart immediately to prevent double orders
       cartDispatch({ type: "CLEAR_CART" })
+      
+      const order = await createOrder(userId, itemsToOrder, totalToCharge)
 
       toast({
         title: "Pedido criado com sucesso!",
-        description: `Pedido #${order.id} registrado. Redirecionando para seus pedidos...`,
+        description: `Pedido #${order.id} registrado.`,
       })
 
-      await new Promise((resolve) => setTimeout(resolve, 1000))
       router.push("/minha-conta")
     } catch (error) {
-      console.error("[v0] Error creating order:", error)
+      console.error("Error creating order:", error)
       toast({
         title: "Erro ao criar pedido",
         description: "Ocorreu um erro ao processar seu pedido. Tente novamente.",
         variant: "destructive",
       })
+      orderBeingCreated.current = false
       setIsProcessing(false)
     }
-  }, [
-    user,
-    cartState.items,
-    cartState.itemCount,
-    cartState.total,
-    isProcessing,
-    orderCreated,
-    createOrder,
-    cartDispatch,
-    toast,
-    router,
-  ])
-
-  useEffect(() => {
-    if (user && cartState.itemCount > 0 && !isProcessing && !orderCreated) {
-      handleCreateOrder()
-    }
-  }, [user, cartState.itemCount, isProcessing, orderCreated, handleCreateOrder])
-
-  if (cartState.itemCount === 0) {
-    return null
   }
 
-  if (user && isProcessing) {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    
+    if (isProcessing) return
+
+    const loggedInUser = await login(loginData.email, loginData.password)
+
+    if (loggedInUser) {
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Processando seu pedido...",
+      })
+      // Process order immediately after successful login
+      await processOrder(loggedInUser.id)
+    } else {
+      toast({
+        title: "Erro ao fazer login",
+        description: "Email ou senha incorretos. Tente novamente.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    
+    if (isProcessing) return
+
+    const registeredUser = await register(
+      registerData.name,
+      registerData.email,
+      registerData.password,
+      registerData.cpf,
+      registerData.phone,
+    )
+
+    if (registeredUser) {
+      toast({
+        title: "Conta criada com sucesso!",
+        description: "Processando seu pedido...",
+      })
+      // Process order immediately after successful registration
+      await processOrder(registeredUser.id)
+    } else {
+      toast({
+        title: "Erro ao criar conta",
+        description: "Não foi possível criar sua conta. Tente novamente.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // If cart is empty and not processing, show empty state with redirect option
+  if (cartState.itemCount === 0 && !isProcessing) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <ShoppingCart className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Seu carrinho está vazio</h2>
+            <p className="text-muted-foreground mb-4">Adicione cursos ou eBooks para continuar</p>
+            <div className="flex gap-4 justify-center">
+              <Button onClick={() => router.push("/cursos")} variant="outline">
+                Ver Cursos
+              </Button>
+              <Button onClick={() => router.push("/ebooks")}>
+                Ver eBooks
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
+  // Show processing state
+  if (isProcessing) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -156,6 +158,8 @@ export default function CheckoutPage() {
       </div>
     )
   }
+
+  
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -178,7 +182,7 @@ export default function CheckoutPage() {
                         <h3 className="font-medium text-sm">{item.title}</h3>
                         <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
                           <span className="bg-secondary px-2 py-1 rounded">{item.category}</span>
-                          <span>{item.hours} horas</span>
+                          {item.hours > 0 && <span>{item.hours} horas</span>}
                         </div>
                       </div>
                       <div className="text-right">
@@ -234,6 +238,7 @@ export default function CheckoutPage() {
                               onChange={(e) => setLoginData((prev) => ({ ...prev, email: e.target.value }))}
                               className="pl-10"
                               required
+                              disabled={isLoading || isProcessing}
                             />
                           </div>
                         </div>
@@ -249,18 +254,19 @@ export default function CheckoutPage() {
                               onChange={(e) => setLoginData((prev) => ({ ...prev, password: e.target.value }))}
                               className="pl-10"
                               required
+                              disabled={isLoading || isProcessing}
                             />
                           </div>
                         </div>
                         <Button
                           type="submit"
                           className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-                          disabled={isLoading}
+                          disabled={isLoading || isProcessing}
                         >
-                          {isLoading ? (
+                          {isLoading || isProcessing ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Entrando...
+                              {isProcessing ? "Processando..." : "Entrando..."}
                             </>
                           ) : (
                             "Entrar e Continuar"
@@ -291,6 +297,7 @@ export default function CheckoutPage() {
                               onChange={(e) => setRegisterData((prev) => ({ ...prev, name: e.target.value }))}
                               className="pl-10"
                               required
+                              disabled={isLoading || isProcessing}
                             />
                           </div>
                         </div>
@@ -306,6 +313,7 @@ export default function CheckoutPage() {
                               onChange={(e) => setRegisterData((prev) => ({ ...prev, email: e.target.value }))}
                               className="pl-10"
                               required
+                              disabled={isLoading || isProcessing}
                             />
                           </div>
                         </div>
@@ -329,6 +337,7 @@ export default function CheckoutPage() {
                               className="pl-10"
                               maxLength={14}
                               required
+                              disabled={isLoading || isProcessing}
                             />
                           </div>
                         </div>
@@ -352,6 +361,7 @@ export default function CheckoutPage() {
                               className="pl-10"
                               maxLength={15}
                               required
+                              disabled={isLoading || isProcessing}
                             />
                           </div>
                         </div>
@@ -368,18 +378,19 @@ export default function CheckoutPage() {
                               className="pl-10"
                               required
                               minLength={6}
+                              disabled={isLoading || isProcessing}
                             />
                           </div>
                         </div>
                         <Button
                           type="submit"
                           className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-                          disabled={isLoading}
+                          disabled={isLoading || isProcessing}
                         >
-                          {isLoading ? (
+                          {isLoading || isProcessing ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Criando conta...
+                              {isProcessing ? "Processando..." : "Criando conta..."}
                             </>
                           ) : (
                             "Criar Conta e Continuar"

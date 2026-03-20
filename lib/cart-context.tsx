@@ -32,8 +32,9 @@ const CartContext = createContext<{
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM": {
+      // Check for duplicate using the unique item id
       const existingItemIndex = state.items.findIndex(
-        (item) => item.courseId === action.payload.courseId && item.hours === action.payload.hours,
+        (item) => item.id === action.payload.id,
       )
 
       let newItems: CartItem[]
