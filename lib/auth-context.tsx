@@ -100,15 +100,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
-    console.log("[v0] Attempting login for:", email)
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
     if (error) {
-      console.log("[v0] Login error:", error.message, error.status)
       setState((prev) => ({ ...prev, isLoading: false }))
 
       if (error.message.includes("Email not confirmed")) {
@@ -117,32 +114,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return null
     }
-    
-    console.log("[v0] Login successful, user:", data.user?.email)
 
     if (!data.user) {
       setState((prev) => ({ ...prev, isLoading: false }))
       return null
     }
 
-    console.log("[v0] Fetching profile for user ID:", data.user.id)
-    
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", data.user.id)
       .single()
 
-    console.log("[v0] Profile result:", profile, "Error:", profileError?.message)
-
     if (profileError) {
-      console.log("[v0] Profile error - returning null")
       setState({ user: null, isLoading: false })
       return null
     }
 
     if (!profile) {
-      console.log("[v0] No profile found - returning null")
       setState({ user: null, isLoading: false })
       return null
     }
@@ -240,7 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient()
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
+      redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
     })
 
     if (error) {
