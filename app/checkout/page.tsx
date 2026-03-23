@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, FormEvent } from "react"
+import { useState, useRef, useEffect, FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,11 +21,28 @@ export default function CheckoutPage() {
   const [activeTab, setActiveTab] = useState("login")
   const [isProcessing, setIsProcessing] = useState(false)
   const orderBeingCreated = useRef(false)
+  const hasProcessedLoggedInUser = useRef(false)
   const { user, login, register, isLoading } = useAuth()
   const { state: cartState, dispatch: cartDispatch } = useCart()
   const { createOrder } = useOrders()
   const { toast } = useToast()
   const router = useRouter()
+  
+  // Effect to process order for already logged-in users
+  useEffect(() => {
+    // Only run once when we have a user, cart items, and haven't already processed
+    if (
+      user && 
+      !isLoading && 
+      cartState.itemCount > 0 && 
+      !isProcessing && 
+      !orderBeingCreated.current &&
+      !hasProcessedLoggedInUser.current
+    ) {
+      hasProcessedLoggedInUser.current = true
+      processOrder(user.id)
+    }
+  }, [user, isLoading, cartState.itemCount, isProcessing])
 
   // Process order after login/register - with ref guard to prevent double calls
   const processOrder = async (userId: string) => {
@@ -38,14 +55,15 @@ export default function CheckoutPage() {
     setIsProcessing(true)
 
     try {
-      // Copy items before clearing cart
+      // Copy items before attempting to create order
       const itemsToOrder = [...cartState.items]
       const totalToCharge = cartState.total
       
-      // Clear cart immediately to prevent double orders
-      cartDispatch({ type: "CLEAR_CART" })
-      
+      // Create order FIRST - only clear cart if successful
       const order = await createOrder(userId, itemsToOrder, totalToCharge)
+
+      // Order created successfully - NOW clear the cart
+      cartDispatch({ type: "CLEAR_CART" })
 
       toast({
         title: "Pedido criado com sucesso!",
@@ -60,6 +78,7 @@ export default function CheckoutPage() {
         description: "Ocorreu um erro ao processar seu pedido. Tente novamente.",
         variant: "destructive",
       })
+      // Reset flags so user can try again - cart items are preserved
       orderBeingCreated.current = false
       setIsProcessing(false)
     }

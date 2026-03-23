@@ -43,19 +43,35 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       throw new Error("Erro ao criar pedido")
     }
 
-    const orderItems = items.map((item) => ({
-      order_id: orderId,
-      course_id: item.courseId,
-      title: item.title,
-      category: item.category,
-      hours: item.hours,
-      price: item.price,
-    }))
+    // Map items handling the difference between courses and ebooks
+    // Ebooks don't have course_id or hours, so we use null/0 as fallback
+    const orderItems = items.map((item) => {
+      const isEbook = item.category?.toLowerCase() === "ebook" || item.category?.toLowerCase() === "ebooks"
+      return {
+        order_id: orderId,
+        course_id: isEbook ? null : (item.courseId || null),
+        title: item.title,
+        category: item.category,
+        hours: isEbook ? 0 : (item.hours || 0),
+        price: item.price,
+      }
+    })
 
     const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
 
     if (itemsError) {
       console.error("[v0] Error creating order items:", itemsError)
+      
+      // Rollback: delete the order that was just created to avoid orphan records
+      const { error: rollbackError } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", orderId)
+      
+      if (rollbackError) {
+        console.error("[v0] Error rolling back order:", rollbackError)
+      }
+      
       throw new Error("Erro ao criar itens do pedido")
     }
 
