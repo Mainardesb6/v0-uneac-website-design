@@ -38,14 +38,15 @@ export default function CheckoutPage() {
     setIsProcessing(true)
 
     try {
-      // Copy items before clearing cart
+      // Copy items before attempting to create order
       const itemsToOrder = [...cartState.items]
       const totalToCharge = cartState.total
       
-      // Clear cart immediately to prevent double orders
-      cartDispatch({ type: "CLEAR_CART" })
-      
+      // Create order FIRST - only clear cart if successful
       const order = await createOrder(userId, itemsToOrder, totalToCharge)
+
+      // Order created successfully - NOW clear the cart
+      cartDispatch({ type: "CLEAR_CART" })
 
       toast({
         title: "Pedido criado com sucesso!",
@@ -60,6 +61,7 @@ export default function CheckoutPage() {
         description: "Ocorreu um erro ao processar seu pedido. Tente novamente.",
         variant: "destructive",
       })
+      // Reset flags so user can try again - cart items are preserved
       orderBeingCreated.current = false
       setIsProcessing(false)
     }
