@@ -179,6 +179,76 @@ export const ebooks: Ebook[] = [
     category: "Educação e Saúde",
     pages: 20,
     price: 19.99
+  },
+  {
+    id: "ebook-18",
+    title: "A Fase Pré-Silábica na Psicogênese da Língua Escrita",
+    description: "Receba em seu e-mail o PDF completo deste conteúdo para se aprofundar ainda mais no tema. Nosso eBook é ilustrado, comentado e totalmente atualizado, pensado para facilitar a compreensão e tornar o aprendizado mais dinâmico e prático.",
+    image: "/images/ebooks/fase-pre-silabica-psicogenese.jpg",
+    author: "Profª Juliana Moraes",
+    category: "Educação e Saúde",
+    pages: 20,
+    price: 19.99
+  },
+  {
+    id: "ebook-19",
+    title: "A Fase Silábica na Psicogênese da Língua Escrita",
+    description: "Receba em seu e-mail o PDF completo deste conteúdo para se aprofundar ainda mais no tema. Nosso eBook é ilustrado, comentado e totalmente atualizado, pensado para facilitar a compreensão e tornar o aprendizado mais dinâmico e prático.",
+    image: "/images/ebooks/fase-silabica-psicogenese.jpg",
+    author: "Profª Juliana Moraes",
+    category: "Educação e Saúde",
+    pages: 20,
+    price: 19.99
+  },
+  {
+    id: "ebook-20",
+    title: "A Fase Silábica-Alfabética",
+    description: "Receba em seu e-mail o PDF completo deste conteúdo para se aprofundar ainda mais no tema. Nosso eBook é ilustrado, comentado e totalmente atualizado, pensado para facilitar a compreensão e tornar o aprendizado mais dinâmico e prático.",
+    image: "/images/ebooks/fase-silabica-alfabetica.jpg",
+    author: "Profª Juliana Moraes",
+    category: "Educação e Saúde",
+    pages: 20,
+    price: 19.99
+  },
+  {
+    id: "ebook-21",
+    title: "A Psicogênese da Língua Escrita: Desvendando o Caminho da Alfabetização",
+    description: "Receba em seu e-mail o PDF completo deste conteúdo para se aprofundar ainda mais no tema. Nosso eBook é ilustrado, comentado e totalmente atualizado, pensado para facilitar a compreensão e tornar o aprendizado mais dinâmico e prático.",
+    image: "/images/ebooks/psicogenese-lingua-escrita-alfabetizacao.jpg",
+    author: "Profª Juliana Moraes",
+    category: "Educação e Saúde",
+    pages: 20,
+    price: 19.99
+  },
+  {
+    id: "ebook-22",
+    title: "A Fase Icônica da Psicogênese da Língua Escrita",
+    description: "Receba em seu e-mail o PDF completo deste conteúdo para se aprofundar ainda mais no tema. Nosso eBook é ilustrado, comentado e totalmente atualizado, pensado para facilitar a compreensão e tornar o aprendizado mais dinâmico e prático.",
+    image: "/images/ebooks/fase-iconica-psicogenese.jpg",
+    author: "Profª Juliana Moraes",
+    category: "Educação e Saúde",
+    pages: 20,
+    price: 19.99
+  },
+  {
+    id: "ebook-23",
+    title: "Garatuja: Desvendando a Fase Pré-Silábica da Escrita",
+    description: "Receba em seu e-mail o PDF completo deste conteúdo para se aprofundar ainda mais no tema. Nosso eBook é ilustrado, comentado e totalmente atualizado, pensado para facilitar a compreensão e tornar o aprendizado mais dinâmico e prático.",
+    image: "/images/ebooks/garatuja-fase-pre-silabica.jpg",
+    author: "Profª Juliana Moraes",
+    category: "Educação e Saúde",
+    pages: 20,
+    price: 19.99
+  },
+  {
+    id: "ebook-24",
+    title: "A Fase Alfabética da Psicogênese da Língua Escrita",
+    description: "Receba em seu e-mail o PDF completo deste conteúdo para se aprofundar ainda mais no tema. Nosso eBook é ilustrado, comentado e totalmente atualizado, pensado para facilitar a compreensão e tornar o aprendizado mais dinâmico e prático.",
+    image: "/images/ebooks/fase-alfabetica-psicogenese.jpg",
+    author: "Profª Juliana Moraes",
+    category: "Educação e Saúde",
+    pages: 20,
+    price: 19.99
   }
 ]
 
