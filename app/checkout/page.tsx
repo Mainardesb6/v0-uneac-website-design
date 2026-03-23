@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, FormEvent } from "react"
+import { useState, useRef, useEffect, FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,11 +21,28 @@ export default function CheckoutPage() {
   const [activeTab, setActiveTab] = useState("login")
   const [isProcessing, setIsProcessing] = useState(false)
   const orderBeingCreated = useRef(false)
+  const hasProcessedLoggedInUser = useRef(false)
   const { user, login, register, isLoading } = useAuth()
   const { state: cartState, dispatch: cartDispatch } = useCart()
   const { createOrder } = useOrders()
   const { toast } = useToast()
   const router = useRouter()
+  
+  // Effect to process order for already logged-in users
+  useEffect(() => {
+    // Only run once when we have a user, cart items, and haven't already processed
+    if (
+      user && 
+      !isLoading && 
+      cartState.itemCount > 0 && 
+      !isProcessing && 
+      !orderBeingCreated.current &&
+      !hasProcessedLoggedInUser.current
+    ) {
+      hasProcessedLoggedInUser.current = true
+      processOrder(user.id)
+    }
+  }, [user, isLoading, cartState.itemCount, isProcessing])
 
   // Process order after login/register - with ref guard to prevent double calls
   const processOrder = async (userId: string) => {
