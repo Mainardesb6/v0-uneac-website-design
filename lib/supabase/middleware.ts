@@ -63,10 +63,19 @@ export async function updateSession(request: NextRequest) {
 
   const isAdminRoute = protectedRoutePrefixes.some((prefix) => request.nextUrl.pathname.startsWith(prefix))
 
-  if (isAdminRoute && user) {
+  if (isAdminRoute) {
+    // Sem sessão: redireciona para login (não para "/" para não revelar a existência do admin)
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = "/login"
+      return NextResponse.redirect(url)
+    }
+
+    // Com sessão: verifica papel de admin no banco
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
 
-    if (profile?.role !== "admin") {
+    // Falha na leitura do perfil ou papel diferente de admin: nega acesso
+    if (!profile || profile.role !== "admin") {
       const url = request.nextUrl.clone()
       url.pathname = "/"
       return NextResponse.redirect(url)

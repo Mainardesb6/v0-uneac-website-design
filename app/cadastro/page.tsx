@@ -37,8 +37,13 @@ export default function CadastroPage() {
       return
     }
 
-    if (formData.password.length < 6) {
-      setError("A senha deve ter no mínimo 6 caracteres.")
+    if (formData.password.length < 8) {
+      setError("A senha deve ter no mínimo 8 caracteres.")
+      return
+    }
+
+    if (!/[0-9]/.test(formData.password) || !/[a-zA-Z]/.test(formData.password)) {
+      setError("A senha deve conter ao menos uma letra e um número.")
       return
     }
 
@@ -83,6 +88,13 @@ export default function CadastroPage() {
         toast({
           title: "E-mail já cadastrado",
           description: "Este e-mail já está em uso. Tente fazer login ou use outro e-mail.",
+          variant: "destructive",
+        })
+      } else if (err.message === "WEAK_PASSWORD") {
+        setError("A senha deve ter no mínimo 8 caracteres, com ao menos uma letra e um número.")
+        toast({
+          title: "Senha fraca",
+          description: "Use ao menos 8 caracteres com letras e números.",
           variant: "destructive",
         })
       } else if (err.message === "CPF_EXISTS") {
@@ -169,12 +181,12 @@ export default function CadastroPage() {
                     <Input
                       id="password"
                       type="password"
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Mínimo 8 caracteres (letras e números)"
                       value={formData.password}
                       onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                       className="pl-10"
                       required
-                      minLength={6}
+                      minLength={8}
                     />
                   </div>
                 </div>

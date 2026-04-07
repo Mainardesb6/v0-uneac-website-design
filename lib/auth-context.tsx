@@ -159,9 +159,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient()
 
-    if (cpf && cpf.replace(/\D/g, "").length === 11) {
-      const formattedCpf = cpf.replace(/\D/g, "")
+    // Validação de senha forte: mínimo 8 chars, ao menos 1 número e 1 letra
+    if (password.length < 8) {
+      setState((prev) => ({ ...prev, isLoading: false }))
+      throw new Error("WEAK_PASSWORD")
+    }
+    if (!/[0-9]/.test(password) || !/[a-zA-Z]/.test(password)) {
+      setState((prev) => ({ ...prev, isLoading: false }))
+      throw new Error("WEAK_PASSWORD")
+    }
 
+    if (cpf && cpf.replace(/\D/g, "").length === 11) {
       const { data: existingCpf, error: cpfCheckError } = await supabase
         .from("profiles")
         .select("cpf")

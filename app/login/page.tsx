@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -14,17 +14,42 @@ import { useAuth } from "@/lib/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2, Mail, Lock } from "lucide-react"
 
+// Proteção cliente contra brute force: após 5 falhas, bloqueia por 60 segundos
+const MAX_ATTEMPTS = 5
+const LOCKOUT_SECONDS = 60
+
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [cooldownSeconds, setCooldownSeconds] = useState(0)
+  const failedAttemptsRef = useRef(0)
+  const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const { login, isLoading } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
 
+  const startCooldown = useCallback(() => {
+    setCooldownSeconds(LOCKOUT_SECONDS)
+    cooldownTimerRef.current = setInterval(() => {
+      setCooldownSeconds((s) => {
+        if (s <= 1) {
+          clearInterval(cooldownTimerRef.current!)
+          failedAttemptsRef.current = 0
+          return 0
+        }
+        return s - 1
+      })
+    }, 1000)
+  }, [])
+
+  const isLocked = cooldownSeconds > 0
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    if (isLocked) return
 
     if (!email || !password) {
       setError("Por favor, preencha todos os campos.")
@@ -35,13 +60,20 @@ export default function LoginPage() {
       const success = await login(email, password)
 
       if (success) {
+        failedAttemptsRef.current = 0
         toast({
           title: "Login realizado com sucesso!",
           description: "Bem-vindo de volta!",
         })
         router.push("/")
       } else {
-        setError("E-mail ou senha inválidos.")
+        failedAttemptsRef.current += 1
+        if (failedAttemptsRef.current >= MAX_ATTEMPTS) {
+          startCooldown()
+          setError(`Muitas tentativas. Aguarde ${LOCKOUT_SECONDS} segundos antes de tentar novamente.`)
+        } else {
+          setError(`E-mail ou senha inválidos. (${failedAttemptsRef.current}/${MAX_ATTEMPTS} tentativas)`)
+        }
         toast({
           title: "Erro no login",
           description: "E-mail ou senha incorretos.",
@@ -49,17 +81,35 @@ export default function LoginPage() {
         })
       }
     } catch (err: any) {
-      // CRITICAL: Check for "Email not confirmed" error
       if (err.message === "EMAIL_NOT_CONFIRMED") {
-        setError("Login falhou. Você precisa confirmar seu e-mail antes de entrar. Verifique sua caixa de entrada.")
+        setError("Você precisa confirmar seu e-mail antes de entrar. Verifique sua caixa de entrada.")
         toast({
           title: "E-mail não confirmado",
-          description: "Você precisa confirmar seu e-mail antes de fazer login. Verifique sua caixa de entrada.",
+          description: "Confirme seu e-mail antes de fazer login.",
           variant: "destructive",
           duration: 8000,
         })
+      } else if (
+        err.message?.includes("rate limit") ||
+        err.message?.includes("too many") ||
+        err.status === 429
+      ) {
+        // Supabase retornou rate limit — bloqueia localmente também
+        startCooldown()
+        setError(`Muitas tentativas. Aguarde ${LOCKOUT_SECONDS} segundos antes de tentar novamente.`)
+        toast({
+          title: "Limite de tentativas atingido",
+          description: "Aguarde antes de tentar novamente.",
+          variant: "destructive",
+        })
       } else {
-        setError("E-mail ou senha inválidos.")
+        failedAttemptsRef.current += 1
+        if (failedAttemptsRef.current >= MAX_ATTEMPTS) {
+          startCooldown()
+          setError(`Muitas tentativas falhas. Aguarde ${LOCKOUT_SECONDS} segundos.`)
+        } else {
+          setError("E-mail ou senha inválidos.")
+        }
         toast({
           title: "Erro no login",
           description: "E-mail ou senha incorretos.",
@@ -132,13 +182,15 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-                  disabled={isLoading}
+                  disabled={isLoading || isLocked}
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Entrando...
                     </>
+                  ) : isLocked ? (
+                    `Aguarde ${cooldownSeconds}s para tentar novamente`
                   ) : (
                     "Entrar"
                   )}
