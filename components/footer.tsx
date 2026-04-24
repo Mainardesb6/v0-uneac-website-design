@@ -1,17 +1,20 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Instagram, Facebook, Youtube, MapPin, Mail } from "lucide-react"
 
 export function Footer() {
   return (
-    <footer className="bg-muted/30 border-t">
+    <footer className="bg-muted/30 border-t" role="contentinfo">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Column 1: Logo and Address */}
           <div className="space-y-4">
-            <Link href="/" className="inline-block">
-              <img
-                src="https://lh3.googleusercontent.com/p/AF1QipPjHVKGYQGOK6_8kJX89eeEf7oealZOQ4obX8Yj=s1360-w1360-h1020"
-                alt="UNEAC"
+            <Link href="/" className="inline-block" aria-label="UNEAC - Pagina inicial">
+              <Image
+                src="/images/uneac-logo.jpg"
+                alt="UNEAC - Cursos de Educacao, Saude e Letras"
+                width={120}
+                height={40}
                 className="h-10 w-auto"
               />
             </Link>
@@ -26,7 +29,7 @@ export function Footer() {
 
           {/* Column 2: Contact */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Contato</h3>
+            <h2 className="font-semibold text-foreground">Contato</h2>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <svg className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
@@ -43,7 +46,7 @@ export function Footer() {
 
           {/* Column 3: Quick Links */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Links Rápidos</h3>
+            <h2 className="font-semibold text-foreground">Links Rapidos</h2>
             <nav className="flex flex-col space-y-2">
               <Link href="/quem-somos" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Quem Somos
@@ -71,7 +74,7 @@ export function Footer() {
 
           {/* Column 4: Social Media */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Redes Sociais</h3>
+            <h2 className="font-semibold text-foreground">Redes Sociais</h2>
             <div className="flex space-x-4">
               <Link
                 href="https://www.instagram.com/uneacuneac/"

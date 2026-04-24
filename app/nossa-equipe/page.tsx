@@ -1,14 +1,25 @@
+import type { Metadata } from "next"
+import Image from "next/image"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
 import { Card, CardContent } from "@/components/ui/card"
 import { GraduationCap, Heart, Lightbulb, Users } from "lucide-react"
 
+export const metadata: Metadata = {
+  title: "Nossa Equipe",
+  description: "Conheca a equipe da UNEAC. Corpo docente formado por mestres, doutores e especialistas reconhecidos.",
+  openGraph: {
+    title: "Nossa Equipe | CURSOS UNEAC",
+    description: "Conheca a equipe da UNEAC. Corpo docente de excelencia.",
+  },
+}
+
 export default function NossaEquipePage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1">
+      <main id="main" className="flex-1">
         {/* Hero Section */}
         <section className="bg-muted/30 py-16">
           <div className="container mx-auto px-4 text-center">
@@ -28,11 +39,14 @@ export default function NossaEquipePage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Photo */}
                     <div className="md:col-span-1">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-white">
-                        <img
+                      <div className="aspect-square rounded-lg overflow-hidden bg-white relative">
+                        <Image
                           src="/images/maria-rita-martins.png"
-                          alt="Maria Rita Martins - Diretora UNEAC"
-                          className="w-full h-full object-cover"
+                          alt="Maria Rita Martins - Diretora UNEAC, fisioterapeuta e pedagoga"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover"
+                          priority
                         />
                       </div>
                       <div className="mt-4 text-center">

@@ -22,6 +22,7 @@ export default function CadastroPage() {
     cpf: "",
     phone: "",
   })
+  const [acceptTerms, setAcceptTerms] = useState(false)
   const [error, setError] = useState("")
   const { register, isLoading } = useAuth()
   const { toast } = useToast()
@@ -31,14 +32,19 @@ export default function CadastroPage() {
     e.preventDefault()
     setError("")
 
-    // Validações
+    // Validacoes
     if (!formData.name || !formData.email || !formData.password) {
-      setError("Por favor, preencha todos os campos obrigatórios.")
+      setError("Por favor, preencha todos os campos obrigatorios.")
       return
     }
 
-    if (formData.password.length < 6) {
-      setError("A senha deve ter no mínimo 6 caracteres.")
+    if (!acceptTerms) {
+      setError("Voce precisa aceitar os Termos de Uso e Politica de Privacidade para continuar.")
+      return
+    }
+
+    if (formData.password.length < 8) {
+      setError("A senha deve ter no minimo 8 caracteres.")
       return
     }
 
@@ -116,7 +122,7 @@ export default function CadastroPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 flex items-center justify-center py-12 px-4">
+      <main id="main" className="flex-1 flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-primary mb-2">Criar sua conta</h1>
@@ -131,12 +137,14 @@ export default function CadastroPage() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome Completo *</Label>
+                  <Label htmlFor="cadastro-name">Nome Completo *</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     <Input
-                      id="name"
+                      id="cadastro-name"
+                      name="name"
                       type="text"
+                      autoComplete="name"
                       placeholder="Seu nome completo"
                       value={formData.name}
                       onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
@@ -147,12 +155,14 @@ export default function CadastroPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">E-mail *</Label>
+                  <Label htmlFor="cadastro-email">E-mail *</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     <Input
-                      id="email"
+                      id="cadastro-email"
+                      name="email"
                       type="email"
+                      autoComplete="email"
                       placeholder="seu@email.com"
                       value={formData.email}
                       onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
@@ -163,29 +173,33 @@ export default function CadastroPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Senha *</Label>
+                  <Label htmlFor="cadastro-password">Senha *</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     <Input
-                      id="password"
+                      id="cadastro-password"
+                      name="password"
                       type="password"
-                      placeholder="Mínimo 6 caracteres"
+                      autoComplete="new-password"
+                      placeholder="Minimo 8 caracteres"
                       value={formData.password}
                       onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                       className="pl-10"
                       required
-                      minLength={6}
+                      minLength={8}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="cpf">CPF *</Label>
+                  <Label htmlFor="cadastro-cpf">CPF *</Label>
                   <div className="relative">
-                    <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     <Input
-                      id="cpf"
+                      id="cadastro-cpf"
+                      name="cpf"
                       type="text"
+                      inputMode="numeric"
                       placeholder="000.000.000-00"
                       value={formData.cpf}
                       onChange={(e) => {
@@ -203,12 +217,15 @@ export default function CadastroPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Telefone *</Label>
+                  <Label htmlFor="cadastro-phone">Telefone *</Label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     <Input
-                      id="phone"
+                      id="cadastro-phone"
+                      name="phone"
                       type="tel"
+                      autoComplete="tel"
+                      inputMode="tel"
                       placeholder="(00) 00000-0000"
                       value={formData.phone}
                       onChange={(e) => {
@@ -225,8 +242,31 @@ export default function CadastroPage() {
                   </div>
                 </div>
 
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    id="accept-terms"
+                    name="acceptTerms"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                    required
+                  />
+                  <label htmlFor="accept-terms" className="text-sm text-muted-foreground leading-relaxed">
+                    Li e aceito os{" "}
+                    <Link href="/termos" className="text-primary hover:underline font-medium">
+                      Termos de Uso
+                    </Link>{" "}
+                    e a{" "}
+                    <Link href="/privacidade" className="text-primary hover:underline font-medium">
+                      Politica de Privacidade
+                    </Link>
+                    . Estou ciente de que meus dados serao tratados conforme a LGPD.
+                  </label>
+                </div>
+
                 {error && (
-                  <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md border border-destructive/20">
+                  <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md border border-destructive/20" role="alert">
                     {error}
                   </div>
                 )}
@@ -258,18 +298,7 @@ export default function CadastroPage() {
             </CardContent>
           </Card>
 
-          <div className="text-center mt-6">
-            <p className="text-xs text-muted-foreground">
-              Ao criar uma conta, você concorda com nossos{" "}
-              <Link href="/termos" className="text-primary hover:underline">
-                Termos de Uso
-              </Link>{" "}
-              e{" "}
-              <Link href="/privacidade" className="text-primary hover:underline">
-                Política de Privacidade
-              </Link>
-            </p>
-          </div>
+          
         </div>
       </main>
       <Footer />

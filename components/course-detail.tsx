@@ -1,12 +1,14 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Clock, Monitor, CheckCircle, ShoppingCart, Award, TrendingUp, BookOpen, Briefcase } from "lucide-react"
+import { Clock, Monitor, CheckCircle, ShoppingCart, Award, TrendingUp, BookOpen, Briefcase, LogIn } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
+import { useAuth } from "@/lib/auth-context"
 import { useToast } from "@/hooks/use-toast"
 
 interface HourOption {
@@ -48,10 +50,23 @@ export function CourseDetail({ course }: CourseDetailProps) {
   // Use course-specific hour options if available, otherwise use defaults
   const hourOptions = course.hourOptions && course.hourOptions.length > 0 ? course.hourOptions : defaultHourOptions
   const [selectedHours, setSelectedHours] = useState(hourOptions[0])
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const { dispatch } = useCart()
+  const { user } = useAuth()
   const { toast } = useToast()
 
   const handleAddToCart = () => {
+    // Se o usuario nao esta logado, mostrar prompt de login
+    if (!user) {
+      setShowLoginPrompt(true)
+      toast({
+        title: "Faca login para continuar",
+        description: "Voce precisa estar logado para adicionar cursos ao carrinho.",
+        variant: "destructive",
+      })
+      return
+    }
+
     const cartItem = {
       id: `${course.id}-${selectedHours.hours}`,
       courseId: course.id.toString(),
@@ -80,7 +95,7 @@ export function CourseDetail({ course }: CourseDetailProps) {
                 <Badge variant="secondary" className="w-fit mx-auto mb-2">
                   {course.category}
                 </Badge>
-                <CardTitle className="text-xl font-bold text-balance">{course.title}</CardTitle>
+                <h1 className="text-xl font-bold text-balance text-card-foreground">{course.title}</h1>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Only show hour selection if there are multiple options */}
@@ -120,13 +135,32 @@ export function CourseDetail({ course }: CourseDetailProps) {
                   <div className="text-sm text-muted-foreground">Certificado de {selectedHours.hours} horas</div>
                 </div>
 
-                <Button
-                  onClick={handleAddToCart}
-                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-6 text-lg flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  <span>Garanta Sua Vaga Agora</span>
-                </Button>
+                {showLoginPrompt && !user ? (
+                  <div className="space-y-3">
+                    <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md border border-destructive/20 text-center">
+                      Voce precisa estar logado para adicionar cursos ao carrinho.
+                    </div>
+                    <div className="flex gap-2">
+                      <Button asChild className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground">
+                        <Link href="/login">
+                          <LogIn className="h-4 w-4 mr-2" aria-hidden="true" />
+                          Entrar
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="flex-1">
+                        <Link href="/cadastro">Cadastrar</Link>
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleAddToCart}
+                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-6 text-lg flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <ShoppingCart className="h-5 w-5" aria-hidden="true" />
+                    <span>Garanta Sua Vaga Agora</span>
+                  </Button>
+                )}
 
                 {/* Course Info */}
                 <div className="space-y-3 pt-4 border-t">
@@ -234,9 +268,46 @@ export function CourseDetail({ course }: CourseDetailProps) {
             </Accordion>
           </section>
 
+          {/* Hour Options Comparison Table */}
+          {hourOptions.length > 1 && (
+            <section>
+              <h2 className="text-2xl font-bold mb-4">Compare as Opcoes de Carga Horaria</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-muted/50">
+                      <th className="border border-border px-4 py-3 text-left font-semibold">Carga Horaria</th>
+                      <th className="border border-border px-4 py-3 text-left font-semibold">Preco</th>
+                      <th className="border border-border px-4 py-3 text-left font-semibold">Parcelamento</th>
+                      <th className="border border-border px-4 py-3 text-left font-semibold">Indicado para</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {hourOptions.map((option, index) => (
+                      <tr key={option.hours} className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}>
+                        <td className="border border-border px-4 py-3 font-medium">{option.hours} horas</td>
+                        <td className="border border-border px-4 py-3 text-primary font-semibold">
+                          R$ {option.price.toFixed(2)}
+                        </td>
+                        <td className="border border-border px-4 py-3 text-muted-foreground">
+                          {option.installments || `2x R$ ${(option.price / 2).toFixed(2)}`}
+                        </td>
+                        <td className="border border-border px-4 py-3 text-muted-foreground">
+                          {option.hours <= 40 && "Horas complementares / Atividades extracurriculares"}
+                          {option.hours === 80 && "Progressao de carreira / Adicional de qualificacao"}
+                          {option.hours >= 100 && "Licenca capacitacao / Especializacao profissional"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
           {/* Target Audience */}
           <section>
-            <h2 className="text-2xl font-bold mb-4">Público-Alvo</h2>
+            <h2 className="text-2xl font-bold mb-4">Publico-Alvo</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {course.targetAudience.map((audience, index) => (
                 <div key={index} className="flex items-center space-x-2">

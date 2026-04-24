@@ -1,14 +1,24 @@
+import type { Metadata } from "next"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Target, MapPin, Phone, Heart, Lightbulb } from "lucide-react"
 
+export const metadata: Metadata = {
+  title: "Quem Somos",
+  description: "Conheca a historia da UNEAC, nossa missao, visao e valores. Mais de 10 mil alunos atendidos desde 2015.",
+  openGraph: {
+    title: "Quem Somos | CURSOS UNEAC",
+    description: "Historia, missao e compromisso com a educacao de qualidade.",
+  },
+}
+
 export default function QuemSomosPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1">
+      <main id="main" className="flex-1">
         {/* Hero Section */}
         <section className="bg-muted/30 py-16">
           <div className="container mx-auto px-4 text-center">

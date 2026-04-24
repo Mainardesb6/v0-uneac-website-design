@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -38,11 +39,13 @@ export function CourseGrid({ category }: CourseGridProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.map((course) => (
             <Card key={course.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className={`overflow-hidden rounded-t-lg ${hasCustomHourOptions(course) ? 'aspect-square bg-muted/20' : 'aspect-video'}`}>
-                <img
+              <div className={`overflow-hidden rounded-t-lg relative ${hasCustomHourOptions(course) ? 'aspect-square bg-muted/20' : 'aspect-video'}`}>
+                <Image
                   src={course.image || "/placeholder.svg"}
-                  alt={course.title}
-                  className={`w-full h-full group-hover:scale-105 transition-transform duration-300 ${hasCustomHourOptions(course) ? 'object-contain' : 'object-cover'}`}
+                  alt={`Imagem do curso ${course.title}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className={`group-hover:scale-105 transition-transform duration-300 ${hasCustomHourOptions(course) ? 'object-contain' : 'object-cover'}`}
                 />
               </div>
 
@@ -67,7 +70,13 @@ export function CourseGrid({ category }: CourseGridProps) {
                 <div className="flex items-center justify-between">
                   <div className="text-lg font-bold text-primary">{course.price}</div>
                   <Button asChild size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                    <Link href={`/curso/${course.id}`}>Saiba Mais</Link>
+                    <Link 
+                      href={`/curso/${course.id}`}
+                      aria-label={`Ver detalhes do curso ${course.title}`}
+                    >
+                      Ver Curso
+                      <span className="sr-only">: {course.title}</span>
+                    </Link>
                   </Button>
                 </div>
               </CardContent>

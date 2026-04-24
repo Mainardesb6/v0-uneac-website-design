@@ -174,11 +174,16 @@ export function Header() {
               size="sm"
               onClick={() => setIsCartOpen(true)}
               className="relative flex items-center space-x-2"
+              aria-label={`Carrinho de compras${state.itemCount > 0 ? `, ${state.itemCount} ${state.itemCount === 1 ? 'item' : 'itens'}` : ', vazio'}`}
+              aria-haspopup="dialog"
             >
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingCart className="h-4 w-4" aria-hidden="true" />
               <span>Carrinho</span>
               {state.itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold animate-pulse">
+                <span 
+                  className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold animate-pulse"
+                  aria-hidden="true"
+                >
                   {state.itemCount}
                 </span>
               )}
@@ -194,14 +199,16 @@ export function Header() {
             size="sm"
             className="md:hidden"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
+            aria-label={isMenuOpen ? "Fechar menu de navegacao" : "Abrir menu de navegacao"}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
           >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMenuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
           </Button>
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden border-t bg-background">
+          <div id="mobile-menu" className="md:hidden border-t bg-background" role="navigation" aria-label="Menu principal">
             <nav className="container mx-auto px-4 py-4 space-y-4">
               <Link
                 href="/"

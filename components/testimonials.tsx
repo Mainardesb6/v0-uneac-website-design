@@ -92,10 +92,19 @@ const testimonials = [
   },
 ]
 
+// T23: Limitar a 6 depoimentos iniciais para melhor performance
+const displayedTestimonials = testimonials.slice(0, 6)
+
 export function Testimonials() {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const prefersReducedMotion = typeof window !== "undefined" 
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches 
+    : false
 
   useEffect(() => {
+    // Respeitar prefers-reduced-motion
+    if (prefersReducedMotion) return
+
     const scrollContainer = scrollRef.current
     if (!scrollContainer) return
 
@@ -124,7 +133,7 @@ export function Testimonials() {
       scrollContainer.removeEventListener("mouseenter", handleMouseEnter)
       scrollContainer.removeEventListener("mouseleave", handleMouseLeave)
     }
-  }, [])
+  }, [prefersReducedMotion])
 
   return (
     <section className="py-16 bg-muted/30">
@@ -139,8 +148,8 @@ export function Testimonials() {
         </div>
 
         <div ref={scrollRef} className="flex gap-6 overflow-x-hidden pb-4" style={{ scrollBehavior: "smooth" }}>
-          {/* Duplicate testimonials for seamless loop */}
-          {[...testimonials, ...testimonials].map((testimonial, index) => (
+          {/* Duplicate testimonials for seamless loop - usando apenas 6 para melhor performance */}
+          {[...displayedTestimonials, ...displayedTestimonials].map((testimonial, index) => (
             <Card
               key={index}
               className="bg-background border-border/50 hover:shadow-md transition-shadow flex-shrink-0 w-[350px]"

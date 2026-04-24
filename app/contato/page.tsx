@@ -1,5 +1,6 @@
 "use client"
 import { useState, type FormEvent } from "react"
+import type { Metadata } from "next"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
@@ -64,7 +65,7 @@ export default function ContatoPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1">
+      <main id="main" className="flex-1">
         {/* Hero Section */}
         <section className="bg-muted/30 py-16">
           <div className="container mx-auto px-4 text-center">
@@ -97,40 +98,71 @@ export default function ContatoPage() {
                     ) : (
                       <form onSubmit={handleSubmit} className="space-y-4">
                         {error && (
-                          <div className="text-sm text-red-600 p-3 bg-red-50 rounded border border-red-200">
+                          <div className="text-sm text-red-600 p-3 bg-red-50 rounded border border-red-200" role="alert">
                             {error}
                           </div>
                         )}
-                        <Input
-                          placeholder="Seu nome completo"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          required
-                          disabled={isLoading}
-                        />
-                        <Input
-                          type="email"
-                          placeholder="Seu e-mail"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                          disabled={isLoading}
-                        />
-                        <Input
-                          type="tel"
-                          placeholder="Seu telefone (opcional)"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          disabled={isLoading}
-                        />
-                        <Textarea
-                          placeholder="Sua mensagem"
-                          rows={5}
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
-                          required
-                          disabled={isLoading}
-                        />
+                        <div className="space-y-2">
+                          <label htmlFor="contact-name" className="text-sm font-medium text-foreground">
+                            Nome completo <span className="text-destructive">*</span>
+                          </label>
+                          <Input
+                            id="contact-name"
+                            name="name"
+                            autoComplete="name"
+                            placeholder="Seu nome completo"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            disabled={isLoading}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="contact-email" className="text-sm font-medium text-foreground">
+                            E-mail <span className="text-destructive">*</span>
+                          </label>
+                          <Input
+                            id="contact-email"
+                            name="email"
+                            type="email"
+                            autoComplete="email"
+                            placeholder="Seu e-mail"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            disabled={isLoading}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="contact-phone" className="text-sm font-medium text-foreground">
+                            Telefone <span className="text-muted-foreground text-xs">(opcional)</span>
+                          </label>
+                          <Input
+                            id="contact-phone"
+                            name="phone"
+                            type="tel"
+                            autoComplete="tel"
+                            placeholder="Seu telefone"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            disabled={isLoading}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="contact-message" className="text-sm font-medium text-foreground">
+                            Mensagem <span className="text-destructive">*</span>
+                          </label>
+                          <Textarea
+                            id="contact-message"
+                            name="message"
+                            placeholder="Sua mensagem"
+                            rows={5}
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            required
+                            disabled={isLoading}
+                          />
+                        </div>
                         <Button
                           type="submit"
                           disabled={isLoading}
@@ -138,7 +170,7 @@ export default function ContatoPage() {
                         >
                           {isLoading ? (
                             <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                               Enviando...
                             </>
                           ) : (

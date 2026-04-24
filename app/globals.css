@@ -11,21 +11,21 @@
   --card-foreground: oklch(0.2 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0 0);
-  --primary: oklch(0.62 0.15 210); /* UNEAC Cyan Blue #00A9E0 */
+  --primary: oklch(0.50 0.15 210); /* UNEAC Cyan Blue - escurecido para WCAG AA 4.5:1 */
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.96 0 0); /* Light gray */
   --secondary-foreground: oklch(0.2 0 0);
   --muted: oklch(0.96 0 0);
   --muted-foreground: oklch(0.45 0 0);
   /* Changed accent from yellow/orange to UNEAC blue for brand consistency */
-  --accent: oklch(0.62 0.15 210); /* UNEAC Cyan Blue #00A9E0 - matches primary */
+  --accent: oklch(0.50 0.15 210); /* UNEAC Cyan Blue - escurecido para WCAG AA 4.5:1 */
   --accent-foreground: oklch(1 0 0); /* White text for good contrast on blue */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.9 0 0);
   --input: oklch(0.96 0 0);
-  --ring: oklch(0.62 0.15 210);
-  --chart-1: oklch(0.62 0.15 210);
+  --ring: oklch(0.50 0.15 210);
+  --chart-1: oklch(0.50 0.15 210);
   --chart-2: oklch(0.75 0.15 85);
   --chart-3: oklch(0.45 0 0);
   --chart-4: oklch(0.6 0.1 200);
@@ -33,12 +33,12 @@
   --radius: 0.5rem;
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.2 0 0);
-  --sidebar-primary: oklch(0.62 0.15 210);
+  --sidebar-primary: oklch(0.50 0.15 210);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.96 0 0);
   --sidebar-accent-foreground: oklch(0.2 0 0);
   --sidebar-border: oklch(0.9 0 0);
-  --sidebar-ring: oklch(0.62 0.15 210);
+  --sidebar-ring: oklch(0.50 0.15 210);
 }
 
 .dark {
@@ -118,7 +118,23 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    overflow-x: hidden;
+  }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    overflow-x: hidden;
+  }
+}
+
+/* T24: Respeitar preferencias de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

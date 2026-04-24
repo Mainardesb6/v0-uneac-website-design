@@ -68,20 +68,27 @@ export function Newsletter() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-3">
                   {error && (
-                    <div className="text-sm text-red-600 text-center p-3 bg-red-50 rounded border border-red-200">
+                    <div className="text-sm text-red-600 text-center p-3 bg-red-50 rounded border border-red-200" role="alert">
                       {error}
                     </div>
                   )}
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Input
-                      type="email"
-                      placeholder="Seu melhor e-mail"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="flex-1"
-                    />
+                    <div className="flex-1">
+                      <label htmlFor="newsletter-email" className="sr-only">
+                        Seu melhor e-mail
+                      </label>
+                      <Input
+                        id="newsletter-email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="Seu melhor e-mail"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
                     <Button
                       type="submit"
                       disabled={isLoading}
@@ -89,7 +96,7 @@ export function Newsletter() {
                     >
                       {isLoading ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                           Cadastrando...
                         </>
                       ) : (

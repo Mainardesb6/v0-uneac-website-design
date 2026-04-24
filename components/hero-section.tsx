@@ -16,8 +16,8 @@ export function HeroSection() {
             Mais de 10 mil alunos formados
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-balance">
-            Transforme Sua Carreira com Cursos de <span className="text-primary">Excelência</span>
+          <h1 className="text-[clamp(2rem,5vw,4.5rem)] font-bold tracking-tight text-balance leading-tight">
+            Transforme Sua Carreira com Cursos de <span className="text-primary">Excelencia</span>
           </h1>
 
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground md:text-xl text-pretty">

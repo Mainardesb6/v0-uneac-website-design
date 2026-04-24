@@ -20,16 +20,22 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50" onClick={onClose}>
+    <div 
+      className="fixed inset-0 z-50 bg-black/50" 
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cart-title"
+    >
       <div
         className="fixed right-0 top-0 h-full w-full max-w-md bg-background shadow-lg flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-semibold">Carrinho de Compras</h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
+          <h2 id="cart-title" className="text-lg font-semibold">Carrinho de Compras</h2>
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Fechar carrinho">
+            <X className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
 
