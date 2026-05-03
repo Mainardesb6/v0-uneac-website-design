@@ -31,7 +31,7 @@ export function MonthlyCourses() {
       const { data, error } = await supabase
         .from("monthly_courses")
         .select("*")
-        .eq("month", "Abril")
+        .eq("month", "Maio")
         .eq("year", 2026)
         .order("id", { ascending: true })
 
@@ -99,7 +99,7 @@ export function MonthlyCourses() {
       {courses[0]?.video_url && (
         <div className="mb-12">
           <div className="text-center mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">Conheça Nossos Cursos de Abril</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">Conheça Nossos Cursos de Maio</h2>
             <p className="text-muted-foreground">
               Assista ao vídeo e descubra todos os detalhes sobre nossa programação
             </p>
